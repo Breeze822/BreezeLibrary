@@ -1,16 +1,14 @@
 # Author :Breeze_xylf
 # Date :
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from .views import HomeView,BookListView,BookCreateView,BookDeleteView,BookDetailView,BookUpdateView
 from .views import CategoryListView,CategoryCreateView,CategoryDeleteView
 from .views import PublisherListView,PublisherCreateView,PublisherDeleteView
-
 urlpatterns = [
 
 
     path("", HomeView.as_view(), name='home'),
-    # path("", index, name=''),
     path('book_list.html',BookListView.as_view(), name = "book_list" ),
     path('book-create',BookCreateView.as_view(), name = "book_create" ),
     path('book-delete/<int:pk>/',BookDeleteView.as_view(), name = "book_delete" ),
@@ -28,7 +26,5 @@ urlpatterns = [
     path('publisher-delete/<int:pk>',PublisherDeleteView.as_view(),name = "publisher_delete"),
 
 
-
-
-
 ]
+
