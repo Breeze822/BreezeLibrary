@@ -58,31 +58,7 @@ allowed_models = ['Category','Publisher','Book','Member','UserActivity','BorrowR
 #
 #
 
-#
-# @login_required(login_url="/login/")
-# def pages(request):
-#     context = {}
-#     print('pages')
-#     # All resource paths end in .html.
-#     # Pick out the html file name from the url. And load that template.
-#     try:
-#         load_template = request.path.split('/')[-1]
-#         if load_template == 'admin':
-#             return HttpResponseRedirect(reverse('admin:index'))
-#         context['segment'] = load_template
-#
-#         html_template = loader.get_template('home/' + load_template)
-#         print('html_template=',html_template)
-#         return HttpResponse(html_template.render(context, request))
-#
-#     except template.TemplateDoesNotExist:
-#
-#         html_template = loader.get_template('home/page-404.html')
-#         return HttpResponse(html_template.render(context, request))
-#
-#     except:
-#         html_template = loader.get_template('home/page-500.html')
-#         return HttpResponse(html_template.render(context, request))
+#ui
 def uiView(request):
     context = {}
     # All resource paths end in .html.
@@ -150,6 +126,54 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
         return render(request, self.template_name, self.context)
 
+
+# TeacherPage
+# HomePage
+class TeacherView(LoginRequiredMixin, TemplateView):
+    login_url = 'login'
+    template_name = "Teacher/Teacher_Index.html"
+    context = {}
+
+    # users = User.objects.all()
+    # for user in users:
+    #     print(user.get_username(),user.is_superuser)
+    group = Group.objects.all()
+    for a in group:
+        print(a.id,a.name)
+    def get(self, request, *args, **kwargs):
+        book_count = Book.objects.aggregate(Sum('quantity'))['quantity__sum']
+
+        data_count = {"book": book_count,
+                      # "member": Member.objects.all().count(),
+                      "category": Category.objects.all().count(),
+                      "publisher": Publisher.objects.all().count(), }
+
+        # user_activities = UserActivity.objects.order_by("-created_at")[:5]
+        # user_avatar = {e.created_by: Profile.objects.get(user__username=e.created_by).profile_pic.url for e in
+        #                user_activities}
+        # short_inventory = Book.objects.order_by('quantity')[:5]
+        #
+        # current_week = date.today().isocalendar()[1]
+        # new_members = Member.objects.order_by('-created_at')[:5]
+        # new_members_thisweek = Member.objects.filter(created_at__week=current_week).count()
+        # lent_books_thisweek = BorrowRecord.objects.filter(created_at__week=current_week).count()
+
+        # books_return_thisweek = BorrowRecord.objects.filter(end_day__week=current_week)
+        # number_books_return_thisweek = books_return_thisweek.count()
+        # new_closed_records = BorrowRecord.objects.filter(open_or_close=1).order_by('-closed_at')[:5]
+
+        self.context['data_count'] = data_count
+        # self.context['recent_user_activities'] = user_activities
+        # self.context['user_avatar'] = user_avatar
+        # self.context['short_inventory'] = short_inventory
+        # self.context['new_members'] = new_members
+        # self.context['new_members_thisweek'] = new_members_thisweek
+        # self.context['lent_books_thisweek'] = lent_books_thisweek
+        # self.context['books_return_thisweek'] = books_return_thisweek
+        # self.context['number_books_return_thisweek'] = number_books_return_thisweek
+        # self.context['new_closed_records'] = new_closed_records
+
+        return render(request, self.template_name, self.context)
 
 #
 # # Global Serch

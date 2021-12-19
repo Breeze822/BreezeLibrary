@@ -2,14 +2,16 @@
 # Date :
 from django.contrib import admin
 from django.urls import path, include, re_path
+from .views import TeacherView
 from .views import HomeView,BookListView,BookCreateView,BookDeleteView,BookDetailView,BookUpdateView
 from .views import CategoryListView,CategoryCreateView,CategoryDeleteView
 from .views import PublisherListView,PublisherCreateView,PublisherDeleteView
 from .views import uiView
 urlpatterns = [
 
-
-    path("", HomeView.as_view(), name='home'),
+    path("",TeacherView.as_view(),name='teacher'),
+    #home
+    #path("", HomeView.as_view(), name='home'),
     path('book_list.html',BookListView.as_view(), name = "book_list" ),
     path('book-create',BookCreateView.as_view(), name = "book_create" ),
     path('book-delete/<int:pk>/',BookDeleteView.as_view(), name = "book_delete" ),
