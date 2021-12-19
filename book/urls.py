@@ -5,6 +5,7 @@ from django.urls import path, include, re_path
 from .views import HomeView,BookListView,BookCreateView,BookDeleteView,BookDetailView,BookUpdateView
 from .views import CategoryListView,CategoryCreateView,CategoryDeleteView
 from .views import PublisherListView,PublisherCreateView,PublisherDeleteView
+from .views import uiView
 urlpatterns = [
 
 
@@ -26,5 +27,7 @@ urlpatterns = [
     path('publisher-delete/<int:pk>',PublisherDeleteView.as_view(),name = "publisher_delete"),
 
 
+    #ul
+    re_path(r'^ui\.*', uiView, name='ui'),
 ]
 

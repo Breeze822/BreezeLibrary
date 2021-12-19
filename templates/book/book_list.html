@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{#{% load book_extras %}#}
+{% load book_extras %}
 {% block title %} Management {% endblock %} 
 
 <!-- Specific CSS goes HERE -->
@@ -30,10 +30,10 @@
                         <div class="card">
                             <div class="card-header">
                                 <!--h5>Total  books</h5-->
-                                <h5>Total 5 books</h5>
+                                <h5>Total {{ count_total }} books</h5>
                             </div>
 
-{#                            {% show_messages %}#}
+                            {% show_messages %}
 
                             <div class="card-block">
                                 <div class='row'>
@@ -107,7 +107,7 @@
                                         <a href="{% url 'book_create' %}" class='btn btn-primary'>Add book</a>
                                     </div>
                                     <div class='col-8'>
-{#                                        {% show_pagination %}#}
+                                        {% show_pagination %}
                                     </div>
                                 </div>
                             </div>

@@ -32,16 +32,25 @@
 
                     <form role="form" method="post" action="">
 
-                        {% csrf_token %}                   
-
+                        {% csrf_token %}
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" class="custom-control-input" id="customRadio" name="example" value="customEx">
+                            <label class="custom-control-label" for="customRadio">Teacher</label>
+                        </div>
+                         <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" class="custom-control-input" id="customRadio2" name="example" value="customEx">
+                            <label class="custom-control-label" for="customRadio2">Student</label>
+                         </div>
+                        <br />
+                        <br />
                         <div class="input-group mb-3">
                             {{ form.username }}
                         </div>
-                        
+
                         <div class="input-group mb-4">
                             {{ form.password }}
                         </div>
-                        
+
                         <div class="form-group text-left">
                             <div class="checkbox checkbox-fill d-inline">
                                 <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-a1" checked="">

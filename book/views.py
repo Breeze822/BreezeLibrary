@@ -83,10 +83,23 @@ allowed_models = ['Category','Publisher','Book','Member','UserActivity','BorrowR
 #     except:
 #         html_template = loader.get_template('home/page-500.html')
 #         return HttpResponse(html_template.render(context, request))
+def uiView(request):
+    context = {}
+    # All resource paths end in .html.
+    # Pick out the html file name from the url. And load that template.
+    load_template = request.path.split('/')[-1]
+    if load_template == 'admin':
+        return HttpResponseRedirect(reverse('admin:index'))
+    context['segment'] = load_template
+    html_template = loader.get_template('home/' + load_template)
+    print('html_template=',html_template)
+    return HttpResponse(html_template.render(context, request))
 
+#404
 def page_not_found(request,exception):
     return render(request,'home/page-404.html')
 
+#500
 def page_error(request):
     return render(request,'home/page-500.html')
 
@@ -96,10 +109,12 @@ class HomeView(LoginRequiredMixin, TemplateView):
     template_name = "index.html"
     context = {}
 
-    users = User.objects.all()
-    for user in users:
-        print(user.get_username(),user.is_superuser)
-
+    # users = User.objects.all()
+    # for user in users:
+    #     print(user.get_username(),user.is_superuser)
+    group = Group.objects.all()
+    for a in group:
+        print(a.id,a.name)
     def get(self, request, *args, **kwargs):
         book_count = Book.objects.aggregate(Sum('quantity'))['quantity__sum']
 
@@ -204,21 +219,20 @@ class BookListView(LoginRequiredMixin,ListView):
     login_url = 'login'
     model=Book
     context_object_name = 'books'
-    model = Book
     template_name = 'book/book_list.html'
     search_value=""
-    order_field = "-updated_at"
+    order_field = "id"
 
     def get_queryset(self):
         search =self.request.GET.get("search")
-        order_by=self.request.GET.get("orderby","id")
-
-        # if order_by:
-        #     all_books = Book.objects.all().order_by(order_by)
-        #     self.order_field=order_by
-        # else:
-        #     all_books = Book.objects.all().order_by(self.order_field)
-        all_books = Book.objects.all().order_by(order_by)
+        order_by=self.request.GET.get("orderby")
+        print("orderby=",order_by)
+        print("search=",search)
+        if order_by:
+            all_books = Book.objects.all().order_by(order_by)
+            self.order_field=order_by
+        else:
+            all_books = Book.objects.all().order_by(self.order_field)
         if search:
             all_books = all_books.filter(
                 Q(title__icontains=search)|Q(author__icontains=search)
@@ -235,6 +249,7 @@ class BookListView(LoginRequiredMixin,ListView):
         context['count_total'] = self.count_total
         context['search'] = self.search_value
         context['orderby'] = self.order_field
+        print("context=",context['orderby'])
         context['objects'] = self.get_queryset()
         return context
 

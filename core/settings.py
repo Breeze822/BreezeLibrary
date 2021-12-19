@@ -15,11 +15,13 @@ CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config('SECRET_KEY', default='S#perS3crEt_1122')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#开发环境Debug = true
-# DEBUG = config('DEBUG', default=True, cast=bool)
+# 开发环境Debug = true
 
-#用户环境
-DeBug = False
+DEBUG = config('DEBUG', default=True, cast=bool)
+
+# #用户环境
+
+# DeBug = False
 
 # load production server from .env
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', config('SERVER', default='127.0.0.1')]
@@ -68,7 +70,7 @@ TEMPLATES = [
         },
     },
 ]
-
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
