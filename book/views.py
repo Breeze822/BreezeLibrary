@@ -14,7 +14,7 @@ from django.views.generic.edit import CreateView,UpdateView
 from django.core.paginator import Paginator
 from django.db.models import Q,Sum
 from django.http import HttpResponse,HttpResponseRedirect,JsonResponse
-from .models import Book, Category, Publisher, UserActivity
+from .models import Book, Category, Publisher, UserActivity,Class,Teacher
 # from .models import UserActivity,Profile,Member,BorrowRecord
 from django.apps import apps
 from django.conf import settings
@@ -128,7 +128,6 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
 
 # TeacherPage
-# HomePage
 class TeacherView(LoginRequiredMixin, TemplateView):
     login_url = 'login'
     template_name = "Teacher/Teacher_Index.html"
@@ -174,6 +173,56 @@ class TeacherView(LoginRequiredMixin, TemplateView):
         # self.context['new_closed_records'] = new_closed_records
 
         return render(request, self.template_name, self.context)
+
+#ClassInfoPage
+class ClassInfoView(LoginRequiredMixin,TemplateView):
+    login_url = 'login'
+    model = Class
+    context_object_name = 'classes'
+    template_name = 'Teacher/Class/Class_info.html'
+    # TO DO  使用教职工工号搜索相关课程
+    # 目前先展示所有课程
+    search_value =""
+    order_field = "classid"
+    class_total = ""
+
+    def get_queryset(self):
+        search  = self.request.GET.get("search")
+        orderby = self.request.GET.get("orderby")
+        if orderby:
+            all_class = Class.objects.all().order_by(orderby)
+            self.order_field=orderby
+        else:
+            all_class = Class.objects.all().order_by(self.order_field)
+        if search:
+            all_class = all_class.filter(
+                Q(classname__icontains=search) | Q(classid__icontains=search)
+            )
+            # mywhere = ""
+            self.search_value = search
+        self.class_total = all_class.count()
+        paginator = Paginator(all_class, PAGINATOR_NUMBER)
+        page = self.request.GET.get('page')
+        classes = paginator.get_page(page)
+        return classes
+
+    def get_context_data(self,*args, **kwargs):
+        context = super(ClassInfoView,self).get_context_data( *args, **kwargs)
+        context['class_total'] = self.class_total
+        context['search'] = self.search_value
+        context['orderby'] = self.order_field
+        context['objects'] = self.get_queryset()
+        return context
+
+#ClassDetailPage
+class ClassDetailView(LoginRequiredMixin,TemplateView):
+    model = Class
+    context_object_name = 'class'
+    template_name = 'Teacher/Class/class_detail.html'
+    login_url = 'login'
+    def get_object(self, queryset=None):
+        obj = super(ClassDetailView, self).get_object(queryset=queryset)
+        return obj
 
 #
 # # Global Serch
@@ -251,7 +300,6 @@ class BookListView(LoginRequiredMixin,ListView):
         search =self.request.GET.get("search")
         order_by=self.request.GET.get("orderby")
         print("orderby=",order_by)
-        print("search=",search)
         if order_by:
             all_books = Book.objects.all().order_by(order_by)
             self.order_field=order_by
@@ -261,6 +309,7 @@ class BookListView(LoginRequiredMixin,ListView):
             all_books = all_books.filter(
                 Q(title__icontains=search)|Q(author__icontains=search)
             )
+            # mywhere = ""
             self.search_value=search
         self.count_total = all_books.count()
         paginator = Paginator(all_books, PAGINATOR_NUMBER)
@@ -273,7 +322,6 @@ class BookListView(LoginRequiredMixin,ListView):
         context['count_total'] = self.count_total
         context['search'] = self.search_value
         context['orderby'] = self.order_field
-        print("context=",context['orderby'])
         context['objects'] = self.get_queryset()
         return context
 
@@ -284,9 +332,9 @@ class BookDetailView(LoginRequiredMixin,DetailView):
     login_url = 'login'
     # comment_form = CommentForm()
     
-    # def get_object(self, queryset=None):
-    #     obj = super(BookDetailView, self).get_object(queryset=queryset)
-    #     return obj
+    def get_object(self, queryset=None):
+        obj = super(BookDetailView, self).get_object(queryset=queryset)
+        return obj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

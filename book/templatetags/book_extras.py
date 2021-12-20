@@ -12,7 +12,7 @@ def show_pagination(context):
     return {
         'page_objects': context['objects'],
         'search':context['search'],
-        'order_by':context['orderby']
+        'orderby':context['orderby']
     }
 
 @register.inclusion_tag('book/inclusions/_messages.html',takes_context=True)

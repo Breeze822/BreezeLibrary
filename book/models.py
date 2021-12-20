@@ -70,6 +70,54 @@ class Publisher(models.Model):
     def get_absolute_url(self):
         return reverse('publisher_list')
 
+# Teacher
+class Teacher(models.Model):
+    teacherid = models.CharField("TeacherId",max_length=20,primary_key=True)
+    teacher_name = models.CharField("TeacherName",max_length=20)
+    passward = models.CharField("passward",max_length=20)
+    def __str__(self):
+        return self.name
+
+
+#Class
+class Class(models.Model):
+    classid = models.CharField("ClassId",max_length=20,primary_key=True)
+    classname = models.CharField("Classname",max_length=100)
+    semester= models.CharField("Semester",max_length=20)
+    grade = models.CharField("Grade",max_length=20)
+    description = models.TextField()
+    teacher = models.ForeignKey(
+        Teacher,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='class_teacher'
+    )
+    def get_absolute_url(self):
+        return reverse('class_info')
+
+    def __str__(self):
+        return self.classname
+
+
+#Reference_book
+class Reference_Book(models.Model):
+    ISBN = models.CharField("ISBN",max_length=100,primary_key=True)
+    bookname = models.CharField("BookName",max_length=100)
+    author = models.CharField("Author",max_length=100)
+    publisher = models.CharField("Publisher",max_length=100)
+    pub_date =  models.DateTimeField('pub_date', default=timezone.now)
+    link = models.CharField("Link",max_length=100)
+    type = models.CharField("Type",max_length=20)
+    class_id = models.ForeignKey(
+        Class,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='book_class'
+    )
+
+
 
 class Book(models.Model):
     author = models.CharField("Author", max_length=20)
