@@ -33,7 +33,7 @@ urlpatterns = [
 
     #Teacher
     path('ClassInfo',ClassInfoView.as_view(), name="class_info"),
-    # path('class-detial',ClassDetailView.as_view(),name="class_detial"),
+    path('class-detial/<str:pk>/', ClassDetailView.as_view(), name="class_detail"),
 
     #ul
     re_path(r'^ui\.*', uiView, name='ui'),

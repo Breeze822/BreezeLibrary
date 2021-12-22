@@ -30,9 +30,13 @@
                     <br />
                     <br />
 
+
                     <form role="form" method="post" action="">
 
-                        {% csrf_token %}                    
+                        {% csrf_token %}
+                        <div class="input-group mb-2">
+                            {{ form.group }}
+                        </div>
 
                         <div class="input-group mb-3">
                             {{ form.username }}
@@ -40,9 +44,14 @@
                         <span class="text-error">{{ form.username.errors }}</span>
 
                         <div class="input-group mb-3">
-                            {{ form.email }}
+                            {{ form.first_name }}
                         </div>
-                        <span class="text-error">{{ form.email.errors }}</span>
+                        <span class="text-error">{{ form.first_name.errors }}</span>
+
+                        <div class="input-group mb-3">
+                            {{ form.last_name }}
+                        </div>
+                        <span class="text-error">{{ form.last_name.errors }}</span>
 
                         <div class="input-group mb-4">
                             {{ form.password1 }}

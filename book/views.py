@@ -215,15 +215,28 @@ class ClassInfoView(LoginRequiredMixin,TemplateView):
         return context
 
 #ClassDetailPage
-class ClassDetailView(LoginRequiredMixin,TemplateView):
+class ClassDetailView(LoginRequiredMixin, DetailView):
     model = Class
-    context_object_name = 'class'
+    context_object_name = 'clasz'
     template_name = 'Teacher/Class/class_detail.html'
     login_url = 'login'
+
+    # comment_form = CommentForm()
+
     def get_object(self, queryset=None):
         obj = super(ClassDetailView, self).get_object(queryset=queryset)
         return obj
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_class_name = self.get_object().classname
+        logger.info(f'Book  <<{current_class_name}>> retrieved from db')
+        # comments = Comment.objects.filter(book=self.get_object().id)
+        # related_records = BorrowRecord.objects.filter(book=current_book_name)
+        # context['related_records'] = related_records
+        # context['comments'] = comments
+        # context['comment_form'] = self.comment_form
+        return context
 #
 # # Global Serch
 # @login_required(login_url='login')
@@ -344,7 +357,7 @@ class BookDetailView(LoginRequiredMixin,DetailView):
         # related_records = BorrowRecord.objects.filter(book=current_book_name)
         # context['related_records'] = related_records
         # context['comments'] = comments
-        context['comment_form'] = self.comment_form
+        # context['comment_form'] = self.comment_form
         return context
 
 class BookCreateView(LoginRequiredMixin,CreateView):

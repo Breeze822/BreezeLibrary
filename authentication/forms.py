@@ -4,14 +4,24 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from django import forms
+from django.forms import widgets
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+list_of_choices = (
+    (1, 'Student'),
+    (2, 'Teacher'),
+    (3, 'Admin'),
+)
+
 class LoginForm(forms.Form):
+    group = forms.ChoiceField(
+        choices=list_of_choices,
+        )
     username = forms.CharField(
         widget=forms.TextInput(
             attrs={
-                "placeholder" : "Username",                
+                "placeholder" : "Username",
                 "class": "form-control"
             }
         ))
@@ -22,19 +32,34 @@ class LoginForm(forms.Form):
                 "class": "form-control"
             }
         ))
+    class Meta:
+        model = User
+        fields = ('group', 'username', 'password')
 
 class SignUpForm(UserCreationForm):
+
+    group = forms.ChoiceField(
+        choices=list_of_choices,
+        )
+
     username = forms.CharField(
         widget=forms.TextInput(
             attrs={
-                "placeholder" : "Username",                
+                "placeholder" : "ID",
                 "class": "form-control"
             }
         ))
-    email = forms.EmailField(
-        widget=forms.EmailInput(
+    first_name = forms.CharField(
+        widget=forms.TextInput(
             attrs={
-                "placeholder" : "Email",                
+                "placeholder" : "FistName",
+                "class": "form-control"
+            }
+        ))
+    last_name = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "LastName",
                 "class": "form-control"
             }
         ))
@@ -55,4 +80,4 @@ class SignUpForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')
+        fields = ('group','username', 'first_name', 'last_name','password1', 'password2')

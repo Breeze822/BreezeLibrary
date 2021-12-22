@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/base-teacher.html" %}
 {% load crispy_forms_tags %}
 {% block title %} Management{% endblock %} 
 
@@ -143,60 +143,60 @@
                             </div>
 
                             <!-- Comments -->
-                            <div class="tab-pane fade" id="pills-comment" role="tabpanel" aria-labelledby="pills-comment-tab">
-                                {% if user.is_authenticated %}
-                                <div>
-                                    <form 
-                                        action="{% url 'comment:post_comment' book.id %}" 
-                                        method="POST"
-                                    >
-                                    {% csrf_token %}
-                                        <div class="form-group">
-                                            <label for="body">
-                                                <strong>
-                                                    Add a comment:
-                                                </strong>
-                                            </label>
-
-                                                <div>
-                                                    {{ comment_form.media }}
-                                                    {{ comment_form.body }}
-                                                </div>
-                                        </div>
-
-                                        <!-- 提交按钮 -->
-                                        <button type="submit" class="btn btn-success ">Send</button>                    
-                                    </form>
-                                </div>
-                                <br>
-                            {% else %}
-                                <br>
-                                <h5 class="row justify-content-center">
-                                    Please<a href="{% url 'login' %}">login</a>to reply
-                                </h5>
-                                <br>
-                            {% endif %}
-
-
-                            <h4>Total {{ comments.count }} comments</h4>
-                            <div>
-                                {% for comment in comments %}
-                                    <hr>
-                                    <p>
-                                        <strong style="color: rgb(175, 31, 55)">
-                                            {{ comment.user }} 
-                                        </strong>  
-                                        published at 
-                                        <span style="color: green">
-                                             {{ comment.created_at|date:"Y/m/d H:i" }}
-                                        </span> :
-                                    </p>
-                                    <p>{{ comment.body|safe }}</p>
-
-                                {% endfor %}
-                            </div>
-                            </div>
-                            </div>
+{#                            <div class="tab-pane fade" id="pills-comment" role="tabpanel" aria-labelledby="pills-comment-tab">#}
+{#                                {% if user.is_authenticated %}#}
+{#                                <div>#}
+{#                                    <form #}
+{#                                        action="{% url 'comment:post_comment' book.id %}" #}
+{#                                        method="POST"#}
+{#                                    >#}
+{#                                    {% csrf_token %}#}
+{#                                        <div class="form-group">#}
+{#                                            <label for="body">#}
+{#                                                <strong>#}
+{#                                                    Add a comment:#}
+{#                                                </strong>#}
+{#                                            </label>#}
+{##}
+{#                                                <div>#}
+{#                                                    {{ comment_form.media }}#}
+{#                                                    {{ comment_form.body }}#}
+{#                                                </div>#}
+{#                                        </div>#}
+{##}
+{#                                        <!-- 提交按钮 -->#}
+{#                                        <button type="submit" class="btn btn-success ">Send</button>                    #}
+{#                                    </form>#}
+{#                                </div>#}
+{#                                <br>#}
+{#                            {% else %}#}
+{#                                <br>#}
+{#                                <h5 class="row justify-content-center">#}
+{#                                    Please<a href="{% url 'login' %}">login</a>to reply#}
+{#                                </h5>#}
+{#                                <br>#}
+{#                            {% endif %}#}
+{##}
+{##}
+{#                            <h4>Total {{ comments.count }} comments</h4>#}
+{#                            <div>#}
+{#                                {% for comment in comments %}#}
+{#                                    <hr>#}
+{#                                    <p>#}
+{#                                        <strong style="color: rgb(175, 31, 55)">#}
+{#                                            {{ comment.user }} #}
+{#                                        </strong>  #}
+{#                                        published at #}
+{#                                        <span style="color: green">#}
+{#                                             {{ comment.created_at|date:"Y/m/d H:i" }}#}
+{#                                        </span> :#}
+{#                                    </p>#}
+{#                                    <p>{{ comment.body|safe }}</p>#}
+{##}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                            </div>#}
+{#                            </div>#}
                         </div>
                     </div>
                     

@@ -71,6 +71,7 @@
                                                 <th>Grade</th>
                                                 <th>Teacher_name</th>
                                                 <th>Description</th>
+                                                <th>Operation</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -81,11 +82,11 @@
                                                 <td>{{clasz.semester}}</td>
                                                 <td>{{clasz.grade}}</td>
                                                 <td>{{clasz.teacher.teacher_name}}</td>
-                                                <td>{{clasz.discription}}</td>
+                                                <td>{{ clasz.description }}</td>
                                                 <td>
-{#                                                    <a href="{% url 'class_detail' clasz.id%}" class="badge badge-warning"><i class="feather icon-eye"></i></a>#}
-{#                                                    <a href="{% url 'class_update' clasz.id%}" class="badge badge-info"><i class="feather icon-edit"></i>&nbsp;Update</a>&nbsp;#}
-{#                                                    <a href="{% url 'class_delete' clasz.id%}" class="badge badge-danger"><i class="feather icon-trash-2"></i>&nbsp;Delete</a>&nbsp;#}
+                                                    <a href="{% url 'class_detail' clasz.classid %}" class="badge badge-warning"><i class="feather icon-eye"></i></a>
+{#                                                    <a href="{% url 'class_update' clasz.classid %}" class="badge badge-info"><i class="feather icon-edit"></i>&nbsp;Update</a>&nbsp;#}
+{#                                                    <a href="{% url 'class_delete' clasz.classid %}" class="badge badge-danger"><i class="feather icon-trash-2"></i>&nbsp;Delete</a>&nbsp;#}
                                                 </td>
 
                                             </tr>
