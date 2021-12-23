@@ -80,17 +80,13 @@ def page_error(request):
     return render(request,'home/page-500.html')
 
 # HomePage
-class HomeView(LoginRequiredMixin, TemplateView):
-    login_url = 'login'
+class HomeView( TemplateView):
     template_name = "index.html"
     context = {}
 
     # users = User.objects.all()
     # for user in users:
     #     print(user.get_username(),user.is_superuser)
-    group = Group.objects.all()
-    for a in group:
-        print(a.id,a.name)
     def get(self, request, *args, **kwargs):
         book_count = Book.objects.aggregate(Sum('quantity'))['quantity__sum']
 
@@ -128,25 +124,29 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
 
 # TeacherPage
-class TeacherView(LoginRequiredMixin, TemplateView):
-    login_url = 'login'
+class TeacherView( TemplateView):
     template_name = "Teacher/Teacher_Index.html"
     context = {}
 
     # users = User.objects.all()
     # for user in users:
     #     print(user.get_username(),user.is_superuser)
-    group = Group.objects.all()
-    for a in group:
-        print(a.id,a.name)
     def get(self, request, *args, **kwargs):
         book_count = Book.objects.aggregate(Sum('quantity'))['quantity__sum']
-
         data_count = {"book": book_count,
                       # "member": Member.objects.all().count(),
                       "category": Category.objects.all().count(),
                       "publisher": Publisher.objects.all().count(), }
+        user = self.request.user.username
+        group = None
+        if user :
+            user = User.objects.get(username=user)
+            groups = user.groups.all()
+            if groups:
+                group = groups[0]
 
+
+        # group.get_group_permisssions()
         # user_activities = UserActivity.objects.order_by("-created_at")[:5]
         # user_avatar = {e.created_by: Profile.objects.get(user__username=e.created_by).profile_pic.url for e in
         #                user_activities}
@@ -162,6 +162,7 @@ class TeacherView(LoginRequiredMixin, TemplateView):
         # new_closed_records = BorrowRecord.objects.filter(open_or_close=1).order_by('-closed_at')[:5]
 
         self.context['data_count'] = data_count
+        self.context['group'] = group
         # self.context['recent_user_activities'] = user_activities
         # self.context['user_avatar'] = user_avatar
         # self.context['short_inventory'] = short_inventory
