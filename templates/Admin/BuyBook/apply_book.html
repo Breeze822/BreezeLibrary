@@ -1,0 +1,97 @@
+{% extends "layouts/base-teacher.html" %}
+{% load book_extras %}
+{% block title %} APPLY_BOOK {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">教师求购参考书申请</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/"><i class="feather icon-home"></i></a></li>
+<!--                            <li class="breadcrumb-item"><a href="javascript:">Form Componants</a></li>-->
+                            <li class="breadcrumb-item"><a href="javascript:">申请购买表单</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+        <div class="main-body">
+            <div class="page-wrapper">
+                <!-- [ Main Content ] start -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>添加参考书信息</h5>
+                            </div>
+                            <div class="card-body">
+                                <h5>求购参考书</h5>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <form method="get" action="{% url 'edit_apply_book' %}">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label for="Inputisbn">ISBN</label>
+                                                <input type="text" class="form-control" id="Inputisbn" name="Inputisbn" placeholder="ISBN">
+                                            </div>
+                                            <div class="form-group">
+                                                <label >教师id : {{ teacher }}</label>
+                                                <input type="hidden" class="form-control" id="Inputteacherid" name="Inputteacherid" placeholder="填写教师id">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Inputcourseid">课程id</label>
+                                                <input type="text" class="form-control" id="Inputcourseid" name="Inputcourseid"  placeholder="填写课程id">
+<!--                                                <small id="emailHelp" class="form-text text-muted">我们会在手头宽裕的时候尽快解决您的需求</small>-->
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Inputcoursename">课程名称</label>
+                                                <input type="text" class="form-control" id="Inputcoursename" name="Inputcoursename" placeholder="填写课程名称">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Inputbookname">参考书名称</label>
+                                                <input type="text" class="form-control" id="Inputbookname" name="Inputbookname" placeholder="填写参考书名称">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Inputauthor">作者</label>
+                                                <input type="text" class="form-control" id="Inputauthor" name="Inputauthor" placeholder="填写作者">
+                                            </div>
+                                            <div class="form-group form-check">
+                                                <br>
+<!--                                                <input type="checkbox" class="form-check-input" id="exampleCheck1">-->
+<!--                                                <label class="form-check-label" for="exampleCheck1">Check me out</label>-->
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary" >提交信息</button>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-6">
+<!--                                        <img src="media/django-dashboard-dattaable-screen-4-low.png">-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                </div>
+                <!-- [ Main Content ] end -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

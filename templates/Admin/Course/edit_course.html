@@ -1,0 +1,107 @@
+{% extends "layouts/base-teacher.html" %}
+{% load book_extras %}
+{% block title %} 编辑课程 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">编辑课程</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="javascript:">Form Componants</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:">Form Elements</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+        <div class="main-body">
+            <div class="page-wrapper">
+                <!-- [ Main Content ] start -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>添加参考书信息</h5>
+                            </div>
+                            <div class="card-body">
+                                <h5>求购参考书</h5>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <form method="post" action="{% url 'update_course'%}" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label>课程代号: {{ course.classid }}</label>
+                                                <input type="hidden" class="form-control" id="courseid" name="courseid" placeholder="{{ course.classid }}" value="{{ course.classid }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label >课程名称</label>
+                                                <input type="text" class="form-control" id="coursename" name="coursename" placeholder="{{ course.classname }}" value="{{course.classname}}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="semester">开课学期</label>
+                                                <input type="text" class="form-control" id="semester" name="semester"  placeholder="{{ course.semester }}" value="{{course.semester}}">
+<!--                                                <small id="emailHelp" class="form-text text-muted">我们会在手头宽裕的时候尽快解决您的需求</small>-->
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="grade">开课年级</label>
+                                                <input type="text" class="form-control" id="grade" name="grade" placeholder="{{ course.grade }}" value="{{course.grade}}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="description">课程描述</label>
+                                                <input type="text" class="form-control" id="description" name="description" placeholder="{{ course.description }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>课程参考书</label><br>
+<!--                                                <input type="file" class="form-control" name="uploadfile">-->
+                                                <select class="selectpicker show-tick form-control" name="reference" required data-live-search="true"  >
+                                                    <option selected>选择教学参考书</option>
+                                                    {% for r_book in reference %}
+                                                    <option>{{r_book.bookname}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>课件上传</label>
+                                                <input type="file" class="form-control" name="uploadfile">
+                                            </div>
+                                            <div class="form-group">
+<!--                                                <label for="teacher">教师</label>-->
+                                                <input type="hidden" class="form-control" id="teacher" name="teacher" value="{{ course.teacher.teacher_name }}">
+                                            </div>
+                                            <div class="form-group form-check">
+                                                <br>
+<!--                                                <input type="checkbox" class="form-check-input" id="exampleCheck1">-->
+<!--                                                <label class="form-check-label" for="exampleCheck1">Check me out</label>-->
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </form>
+                                    </div>
+                            </div>
+                        </div>
+
+                </div>
+                <!-- [ Main Content ] end -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

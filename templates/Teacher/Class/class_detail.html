@@ -1,6 +1,6 @@
 {% extends "layouts/base-teacher.html" %}
-{% load crispy_forms_tags %}
-{% block title %} Management{% endblock %} 
+{% load book_extras %}
+{% block title %} 课程信息{% endblock %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -41,18 +41,6 @@
                             <li class="nav-item">
                                 <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-basic" role="tab" aria-controls="pills-basic" aria-selected="true">Summary</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Description</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Location</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="pills-record-tab" data-toggle="pill" href="#pills-record" role="tab" aria-controls="pills-record" aria-selected="false">Borrow History</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="pills-comment-tab" data-toggle="pill" href="#pills-comment" role="tab" aria-controls="pills-comments" aria-selected="false">Comments</a>
-                            </li>
                         </ul>
                         <div class="tab-content" id="pills-tabContent">
                             <!-- Summary -->
@@ -64,143 +52,18 @@
                                         <p>Semester: {{clasz.semester}} </p>
                                         <p>Grade: {{clasz.grade}} </p>
                                         <p>Description: {{clasz.description}} </p>
+                                        <p>File : {{clasz.file}}</p>
+
 
                                     </div>
-                                    <div class='col-6'>
-{#                                        <p>Created at: {{book.created_at|date:"Y/m/d H:i"}} </p>#}
-{#                                        <p>Last updated by: <span class="badge badge-secondary">{{book.updated_by}}</span> at {{book.updated_at|date:"Y/m/d H:i"}} </p>#}
-{#                                        <p>Borrowed times: {{book.total_borrow_times}} </p>#}
-{#                                        <p>Status Now : {{book.get_status_display}} </p>#}
-                                    </div>
-                                </div>
                             </div>
-                            <!-- Description -->
-                            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-                                <p class="mb-0">
-                                    {{clasz.description}}
-                                </p>
-                            </div>
-                            <!-- Location detail -->
-                            <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
-                                <div class='row'>
-                                    <div class='col-6'>
-                                        <p>test</p>
-{#                                        <p> Location Id: {{book.floor_number}}{{book.bookshelf_number}}</p>#}
-{#                                        <p> Floor: {{book.get_floor_number_display}} floor </p>#}
-{#                                        <p> Bookshelf: {{book.bookshelf_number}} </p>#}
-
-                                    </div>
-
-                                </div>
-                            </div>
-                            <!-- Borrow record -->
-{#                            <div class="tab-pane fade" id="pills-record" role="tabpanel" aria-labelledby="pills-record-tab">#}
-{#                             <h5 class='mb-3'>Borrow History</h5>#}
-{#                             {% if related_records %}#}
-{#                             <table class="table table-sm">#}
-{#                                <thead>#}
-{#                                    <tr>#}
-{#                                        <th scope="col">Borrower</th>#}
-{#                                        <th scope="col">Card</th>#}
-{#                                        <th scope="col">Book Name</th>#}
-{#                                        <th scope="col">Start - End</th>#}
-{#                                        <th scope="col">Status</th>#}
-{#                                        <th scope="col">Return at</th>#}
-{#                                        <th scope="col">#</th>#}
-{#                                      </tr>#}
-{#                                </thead>#}
-{#                                <tbody>#}
-{##}
-{#                                 {% for record in related_records%}#}
-{#                                 <tr>#}
-{#                                    <td>{{record.borrower}} </td>#}
-{#                                    <td>{{record.borrower_card}}</td>#}
-{#                                    <td>{{record.book}}</td>#}
-{#                                    <td>{{record.start_day | date:"Y/m/d"}} - {{record.end_day | date:"Y/m/d"}}</td>#}
-{#                                    <td>{{record.get_open_or_close_display}}</td>#}
-{#                                    <td>{{record.closed_at | date:"Y/m/d"}}</td>#}
-{#                                    {% if record.final_status == "Delayed" %}#}
-{#                                        <td>{{record.final_status}}, {{record.delay_days}} days</td>#}
-{#                                    {% else %}#}
-{#                                        <td>{{record.final_status}}</td>#}
-{#                                    {% endif %}#}
-{#                                  </tr>#}
-{##}
-{#                                {% endfor %}#}
-{##}
-{##}
-{##}
-{##}
-{#                                {% else %}#}
-{#                                <h4 class="text-center">No Records</h4>#}
-{#                                {% endif  %}#}
-{#                                </tbody>#}
-{#                              </table>#}
-{##}
-{#                            </div>#}
-
-                            <!-- Comments -->
-{#                            <div class="tab-pane fade" id="pills-comment" role="tabpanel" aria-labelledby="pills-comment-tab">#}
-{#                                {% if user.is_authenticated %}#}
-{#                                <div>#}
-{#                                    <form #}
-{#                                        action="{% url 'comment:post_comment' book.id %}" #}
-{#                                        method="POST"#}
-{#                                    >#}
-{#                                    {% csrf_token %}#}
-{#                                        <div class="form-group">#}
-{#                                            <label for="body">#}
-{#                                                <strong>#}
-{#                                                    Add a comment:#}
-{#                                                </strong>#}
-{#                                            </label>#}
-{##}
-{#                                                <div>#}
-{#                                                    {{ comment_form.media }}#}
-{#                                                    {{ comment_form.body }}#}
-{#                                                </div>#}
-{#                                        </div>#}
-{##}
-{#                                        <!-- 提交按钮 -->#}
-{#                                        <button type="submit" class="btn btn-success ">Send</button>                    #}
-{#                                    </form>#}
-{#                                </div>#}
-{#                                <br>#}
-{#                            {% else %}#}
-{#                                <br>#}
-{#                                <h5 class="row justify-content-center">#}
-{#                                    Please<a href="{% url 'login' %}">login</a>to reply#}
-{#                                </h5>#}
-{#                                <br>#}
-{#                            {% endif %}#}
-{##}
-{##}
-{#                            <h4>Total {{ comments.count }} comments</h4>#}
-{#                            <div>#}
-{#                                {% for comment in comments %}#}
-{#                                    <hr>#}
-{#                                    <p>#}
-{#                                        <strong style="color: rgb(175, 31, 55)">#}
-{#                                            {{ comment.user }} #}
-{#                                        </strong>  #}
-{#                                        published at #}
-{#                                        <span style="color: green">#}
-{#                                             {{ comment.created_at|date:"Y/m/d H:i" }}#}
-{#                                        </span> :#}
-{#                                    </p>#}
-{#                                    <p>{{ comment.body|safe }}</p>#}
-{##}
-{#                                {% endfor %}#}
-{#                            </div>#}
-{#                            </div>#}
-{#                            </div>#}
                         </div>
                     </div>
-                    
+
                 </div>
-                
-                <a href="{% url 'class_info' %}" class='btn btn-dark'>Return List</a>
-{#                <a href="{% url 'book_update' book.id %}" class='btn btn-primary'>Update</a>#}
+
+                <a href="{% url 'edit_course' clasz.classid %}" class='btn btn-dark'>编辑课程</a>
+                <a href="{% url 'class_info' %}" class='btn btn-dark'>返回列表</a>
 
                         </div>
                        

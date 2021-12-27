@@ -25,15 +25,11 @@
                     </li>
                     <li data-username="form elements advance componant validation masking wizard picker select"
                         class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
-                        <a href="/ClassInfo" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Class Information</span></a>
+                        <a href="{% url 'class_info' %}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">Class Information</span></a>
                     </li>
                     <li data-username="Table bootstrap datatable footable"
                         class="nav-item {% if 'ui-tables' in segment %} active {% endif %}">
                         <a href="/ClassDoc.html" class="nav-link "><span class="pcoded-micon"><i class="feather icon-server"></i></span><span class="pcoded-mtext">Class Document</span></a>
-                    </li>
-                    <li data-username="Table bootstrap datatable footable"
-                        class="nav-item  active" >
-                        <a href="/MyClass.html" class="nav-link "><span class="pcoded-micon"><i class="feather icon-server"></i></span><span class="pcoded-mtext">My Class </span></a>
                     </li>
                     <li class="nav-item pcoded-menu-caption">
                         <label>Reference Book</label>
@@ -46,6 +42,23 @@
                         <a href="/maps-google.html" class="nav-link "><span class="pcoded-micon"><i class="feather icon-map"></i></span><span class="pcoded-mtext">Maps</span></a></li>
                     <li data-username="Book Library" class="nav-item"  >
                         <a href="book-library.html" class="nav-link" ><span class="pcoded-micon"><i class="feather icon-book"></i> </span><span class="pcoded-mtext">Book Library</span> </a></li>
+
+                    <li class="nav-item pcoded-menu-caption">
+                        <label>Icelend Mentos</label>
+                    </li>
+                    <li data-username="form elements advance componant validation masking wizard picker select"
+                        class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
+                        <a href="{% url 'buybook' %}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">管理员采购列表</span></a>
+                    </li>
+                    <li data-username="Table bootstrap datatable footable"
+                        class="nav-item {% if 'ui-tables' in segment %} active {% endif %}">
+                        <a href="{% url 'referencelist' %}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-server"></i></span><span class="pcoded-mtext">教参信息展示</span></a>
+                    </li>
+                    <li data-username="form elements advance componant validation masking wizard picker select"
+                        class="nav-item {% if 'ui-forms' in segment %} active {% endif %}">
+                        <a href="{% url 'apply_book' %}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-file-text"></i></span><span class="pcoded-mtext">教师购买申请</span></a>
+                    </li>
+
                     <li class="nav-item pcoded-menu-caption">
                         <label>Storage</label>
                     </li>
@@ -96,8 +109,8 @@
                             {% endif %}
                         </ul>
                     </li>
-                    <li data-username="Sample Page" 
-                        class="nav-item">
+                    <li data-username="Sample Page"
+                        class="nav-item {% if 'page-blank' in segment %} active {% endif %}">
                         <a href="/page-blank.html" class="nav-link"><span class="pcoded-micon"><i class="feather icon-sidebar"></i></span><span class="pcoded-mtext">Sample page</span></a></li>
                     <li data-username="Sample Page" class="nav-item"><a href="/page-404.html" class="nav-link"><span class="pcoded-micon"><i class="feather icon-sidebar"></i></span><span class="pcoded-mtext">Error 404</span></a></li>
 

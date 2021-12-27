@@ -1,6 +1,6 @@
 {% extends "layouts/base-teacher.html" %}
 {% load book_extras %}
-{% block title %} 课程信息 {% endblock %}
+{% block title %} 管理员采购 {% endblock %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -14,7 +14,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-12">
                         <div class="page-header-title">
-                            <h5 class="m-b-10">课程信息展示</h5>
+                            <h5 class="m-b-10">管理员采购</h5>
                         </div>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                             <div class="card-header">
                                 <!--h5>Total  books</h5-->
 <!--                                <h5>Total {{ class_total }} classes</h5>-->
-                                <h5>课程</h5>
+                                <h5>采购列表</h5>
                             </div>
 
                             {% show_messages %}
@@ -40,10 +40,10 @@
                                 <div class='row'>
                                     <div class="col-8">
                                         <b>Sort By : - </b>
-                                        <a href="{% url 'class_info' %}?search={{search}}&orderby=classid">Id</a>  |
-                                        <a href="{% url 'class_info' %}?search={{ search }}&orderby=classname">Classname</a> |
-                                        <a href="{% url 'class_info' %}?search={{ search }}&orderby=semester">semester</a> |
-                                        <a href="{% url 'class_info' %}?search={{ search }}&orderby=grade">grade</a>
+                                        <a href="{% url 'buybook' %}?search={{ search }}&orderby=id">Id</a>  |
+                                        <a href="{% url 'buybook' %}?search={{ search }}&orderby=coursecode">Coursecode</a> |
+                                        <a href="{% url 'buybook' %}?search={{ search }}&orderby=bookname">Bookname</a> |
+                                        <a href="{% url 'buybook' %}?search={{ search }}&orderby=teacher">Teacher</a>
                                     </div>
 
                                     <div class="col-4">
@@ -66,31 +66,57 @@
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
-                                                <th>Class_id</th>
-                                                <th>Class_name</th>
-                                                <th>Semester</th>
-                                                <th>Grade</th>
-                                                <th>Teacher_name</th>
-                                                <th>Description</th>
-                                                <th>Files</th>
-                                                <th>Reference</th>
+                                                <th>id</th>
+                                                <th>课程代号</th>
+                                                <th>课程名称</th>
+                                                <th>ISBN</th>
+                                                <th>书籍名称</th>
+                                                <th>作者</th>
+                                                <th>老师</th>
+                                                <th>邮箱</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for clasz in objects %}
                                             <tr>
-                                                <th scope="row">{{clasz.classid}}</th>
-                                                <td>{{clasz.classname|slice:'10'}}</td>
-                                                <td>{{clasz.semester}}</td>
-                                                <td>{{clasz.grade}}</td>
+                                                <th scope="row">{{clasz.id}}</th>
+                                                <td>{{clasz.coursecode|slice:'10'}}</td>
+                                                <td>{{clasz.coursename}}</td>
+                                                <td>{{clasz.isbn}}</td>
+                                                <td>{{clasz.bookname}}</td>
+                                                <td>{{clasz.author}}</td>
                                                 <td>{{clasz.teacher.teacher_name}}</td>
-                                                <td>{{clasz.description}}</td>
+                                                <td>{{clasz.email}}</td>
                                                 <td>
-                                                    {{clasz.file|slice:'2'}}
+                                                    {% if clasz.status == "1" %}
+                                                        <p>正在购买</p>
+                                                    {% else %}
+                                                        <p>待处理</p>
+                                                    {% endif %}
                                                 </td>
-                                                <td>{{clasz.reference|slice:'5'}}</td>
+<!--                                                <td>{{clasz.status}}</td>-->
                                                 <td>
-                                                   <a href="{% url 'class_detail' clasz.classid%}" class="badge badge-warning"><i class="feather icon-eye"></i></a>
+                                                {% if clasz.status == "0" %}
+
+<!--                                                <td>-->
+<!--{#                                                    <a href="{% url 'class_detail' clasz.id%}" class="badge badge-warning"><i class="feather icon-eye"></i></a>#}-->
+<!--{#                                                    <a href="{% url 'class_update' clasz.id%}" class="badge badge-info"><i class="feather icon-edit"></i>&nbsp;Update</a>&nbsp;#}-->
+<!--{#                                                    <a href="{% url 'class_delete' clasz.id%}" class="badge badge-danger"><i class="feather icon-trash-2"></i>&nbsp;Delete</a>&nbsp;#}-->
+<!--                                                </td>-->
+<!--                                                <td>-->
+<!--                                                   <a href="{% url 'buy'%}" class="badge badge-warning"><i class="feather icon-eye"></i></a>-->
+<!--                                                </td>-->
+                                                <form method="get" action="{% url 'buy' %}">
+                                                    <div class="form-group">
+                                                        <input type="hidden" class="form-control" id="grade" name="bookid" value="{{ clasz.id }}">
+                                                    </div>
+                                                    <button type="submit">购买</button>
+<!--                                                    <button type="submit" class="btn btn-primary">Submit</button>-->
+                                                </form>
+
+                                                {% endif %}
                                                 </td>
 
                                             </tr>

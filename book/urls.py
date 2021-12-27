@@ -6,7 +6,9 @@ from .views import TeacherView,ClassInfoView,ClassDetailView
 from .views import HomeView,BookListView,BookCreateView,BookDeleteView,BookDetailView,BookUpdateView
 from .views import CategoryListView,CategoryCreateView,CategoryDeleteView
 from .views import PublisherListView,PublisherCreateView,PublisherDeleteView
-from .views import uiView
+from .views import uiView, BuybookView, ReferenceListView, Applybook, EditcourseView
+from .views import BuyView
+from . import views
 urlpatterns = [
 
     #Teacher page
@@ -32,10 +34,28 @@ urlpatterns = [
     path('publisher-delete/<int:pk>',PublisherDeleteView.as_view(),name = "publisher_delete"),
 
     #Teacher
-    path('ClassInfo',ClassInfoView.as_view(), name="class_info"),
-    path('class-detial/<str:pk>/', ClassDetailView.as_view(), name="class_detail"),
+    path('ClassInfo', ClassInfoView.as_view(), name="class_info"),
+    path('class_detail/<str:pk>/', ClassDetailView.as_view(), name="class_detail"),
 
     #ul
     re_path(r'^ui\.*', uiView, name='ui'),
+
+    #Admin
+    path('buybook/', BuybookView.as_view(), name='buybook'),
+    path('buy/', BuyView.as_view(), name='buy'),
+    path('edit_apply_book', views.EditApplyBook, name='edit_apply_book'),
+
+    #Booklist
+    path('booklist/', ReferenceListView.as_view(), name='referencelist'),
+
+    #Apply
+    path('apply_book/', Applybook, name='apply_book'),
+
+    #Edit
+    path('edit_course/<str:pk>/', EditcourseView.as_view(), name='edit_course'),
+    #Update
+    # path('update_course/<str:pk>/', UpdatecourseView.as_view(), name='update_course'),
+    path('update_course/', views.Updatecourse, name='update_course'),
+
 ]
 

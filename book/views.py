@@ -1,20 +1,21 @@
 import os
 # import pandas as pd
 import json
-from  django import template
-from django.db.models.functions import ExtractMonth,ExtractWeek,TruncMonth,TruncWeek
-from django.shortcuts import render,get_object_or_404,redirect
+from django import template
+from django.db.models.functions import ExtractMonth, ExtractWeek, TruncMonth, TruncWeek
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
-from django.urls import  reverse_lazy,reverse
+from django.urls import reverse_lazy, reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_protect
-from django.views.generic import ListView,DetailView,DeleteView,View,TemplateView
-from django.views.generic.edit import CreateView,UpdateView
+from django.views.generic import ListView, DetailView, DeleteView, View, TemplateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.core.paginator import Paginator
-from django.db.models import Q,Sum
-from django.http import HttpResponse,HttpResponseRedirect,JsonResponse
-from .models import Book, Category, Publisher, UserActivity,Class,Teacher
+from django.db.models import Q, Sum
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from .models import Book, Category, Publisher, UserActivity, Class, Teacher
+from .models import Buybook, Reference_Book
 # from .models import UserActivity,Profile,Member,BorrowRecord
 from django.apps import apps
 from django.conf import settings
@@ -22,21 +23,22 @@ from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
 from django.db.models import Sum, Count
-from django.contrib.auth.models import User,Group
-from django.contrib.auth.decorators import login_required,user_passes_test,permission_required
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.utils.decorators import method_decorator
+from django.contrib import admin
 
-from django.contrib.auth.mixins import LoginRequiredMixin 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.files.storage import FileSystemStorage
 from django.contrib.messages.views import messages
 from django.views.decorators.csrf import csrf_exempt
-from .forms import BookCreateEditForm,PubCreatedEditForm,MemberCreateEditForm,ProfileForm,BorrowRecordCreateForm
+from .forms import BookCreateEditForm, PubCreatedEditForm, MemberCreateEditForm, ProfileForm, BorrowRecordCreateForm
 
-from util.useful import get_n_days_ago,create_clean_dir,change_col_format
+from util.useful import get_n_days_ago, create_clean_dir, change_col_format
 # from .groups_permissions import check_user_group,user_groups,check_superuser,SuperUserRequiredMixin,allowed_groups
 # from .custom_filter import get_item
-from datetime import date,timedelta,datetime
+from datetime import date, timedelta, datetime
 #
 # from django.forms.models import model_to_dict
 # from django.core.paginator import Paginator
@@ -49,16 +51,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
-
-TODAY=get_n_days_ago(0,"%Y%m%d")
+TODAY = get_n_days_ago(0, "%Y%m%d")
 PAGINATOR_NUMBER = 5
-allowed_models = ['Category','Publisher','Book','Member','UserActivity','BorrowRecord']
+allowed_models = ['Category', 'Publisher', 'Book', 'Member', 'UserActivity', 'BorrowRecord']
+
 
 #
 #
 
-#ui
+# ui
 def uiView(request):
     context = {}
     # All resource paths end in .html.
@@ -68,25 +69,25 @@ def uiView(request):
         return HttpResponseRedirect(reverse('admin:index'))
     context['segment'] = load_template
     html_template = loader.get_template('home/' + load_template)
-    print('html_template=',html_template)
+    print('html_template=', html_template)
     return HttpResponse(html_template.render(context, request))
 
-#404
-def page_not_found(request,exception):
-    return render(request,'home/page-404.html')
 
-#500
+# 404
+def page_not_found(request, exception):
+    return render(request, 'home/page-404.html')
+
+
+# 500
 def page_error(request):
-    return render(request,'home/page-500.html')
+    return render(request, 'home/page-500.html')
+
 
 # HomePage
 class HomeView( TemplateView):
     template_name = "index.html"
     context = {}
 
-    # users = User.objects.all()
-    # for user in users:
-    #     print(user.get_username(),user.is_superuser)
     def get(self, request, *args, **kwargs):
         book_count = Book.objects.aggregate(Sum('quantity'))['quantity__sum']
 
@@ -124,7 +125,7 @@ class HomeView( TemplateView):
 
 
 # TeacherPage
-class TeacherView( TemplateView):
+class TeacherView(TemplateView):
     template_name = "Teacher/Teacher_Index.html"
     context = {}
 
@@ -133,20 +134,18 @@ class TeacherView( TemplateView):
     #     print(user.get_username(),user.is_superuser)
     def get(self, request, *args, **kwargs):
         book_count = Book.objects.aggregate(Sum('quantity'))['quantity__sum']
+
         data_count = {"book": book_count,
                       # "member": Member.objects.all().count(),
                       "category": Category.objects.all().count(),
                       "publisher": Publisher.objects.all().count(), }
         user = self.request.user.username
         group = None
-        if user :
+        if user:
             user = User.objects.get(username=user)
             groups = user.groups.all()
             if groups:
                 group = groups[0]
-
-
-        # group.get_group_permisssions()
         # user_activities = UserActivity.objects.order_by("-created_at")[:5]
         # user_avatar = {e.created_by: Profile.objects.get(user__username=e.created_by).profile_pic.url for e in
         #                user_activities}
@@ -175,31 +174,31 @@ class TeacherView( TemplateView):
 
         return render(request, self.template_name, self.context)
 
-#ClassInfoPage
-class ClassInfoView(LoginRequiredMixin,TemplateView):
+
+# ClassInfoPage
+class ClassInfoView(LoginRequiredMixin, TemplateView):
     login_url = 'login'
     model = Class
     context_object_name = 'classes'
     template_name = 'Teacher/Class/Class_info.html'
     # TO DO  使用教职工工号搜索相关课程
     # 目前先展示所有课程
-    search_value =""
+    search_value = ""
     order_field = "classid"
     class_total = ""
 
     def get_queryset(self):
-        search  = self.request.GET.get("search")
+        search = self.request.GET.get("search")
         orderby = self.request.GET.get("orderby")
         if orderby:
             all_class = Class.objects.all().order_by(orderby)
-            self.order_field=orderby
+            self.order_field = orderby
         else:
             all_class = Class.objects.all().order_by(self.order_field)
         if search:
             all_class = all_class.filter(
                 Q(classname__icontains=search) | Q(classid__icontains=search)
             )
-            # mywhere = ""
             self.search_value = search
         self.class_total = all_class.count()
         paginator = Paginator(all_class, PAGINATOR_NUMBER)
@@ -207,15 +206,211 @@ class ClassInfoView(LoginRequiredMixin,TemplateView):
         classes = paginator.get_page(page)
         return classes
 
-    def get_context_data(self,*args, **kwargs):
-        context = super(ClassInfoView,self).get_context_data( *args, **kwargs)
+    def get_context_data(self, *args, **kwargs):
+        context = super(ClassInfoView, self).get_context_data(*args, **kwargs)
         context['class_total'] = self.class_total
         context['search'] = self.search_value
         context['orderby'] = self.order_field
         context['objects'] = self.get_queryset()
         return context
 
-#ClassDetailPage
+
+class BuybookView(LoginRequiredMixin, TemplateView):
+    login_url = 'login'
+    model = Buybook
+    context_object_name = 'buybooks'
+    template_name = 'Admin/BuyBook/buybook.html'
+    # TO DO  使用教职工工号搜索相关课程
+    # 目前先展示所有课程
+    search_value = ""
+    order_field = ""
+    class_total = ""
+
+    def get_queryset(self):
+        search = self.request.GET.get("search")
+        orderby = self.request.GET.get("orderby")
+        if orderby:
+            all_book = Buybook.objects.all().order_by(orderby)
+            self.order_field = orderby
+        else:
+            # all_book = Buybook.objects.all().order_by(self.order_field)
+            all_book = Buybook.objects.all()
+        if search:
+            all_book = all_book.filter(
+                Q(bookname__icontains=search) | Q(author__icontains=search) | Q(coursename__icontains=search) |
+                Q(teacher__teacher_name__icontains=search)
+            )
+            # mywhere = ""
+            self.search_value = search
+        self.class_total = all_book.count()
+        paginator = Paginator(all_book, PAGINATOR_NUMBER)
+        page = self.request.GET.get('page')
+        classes = paginator.get_page(page)
+        return classes
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(BuybookView, self).get_context_data(*args, **kwargs)
+        context['class_total'] = self.class_total
+        print(context['class_total'])
+        context['search'] = self.search_value
+        context['orderby'] = self.order_field
+        context['objects'] = self.get_queryset()
+        return context
+
+
+class BuyView(LoginRequiredMixin, TemplateView):
+    login_url = 'login'
+    model = Buybook
+    context_object_name = 'buybooks'
+    template_name = 'Admin/BuyBook/edit_buybook.html'
+    # TO DO  使用教职工工号搜索相关课程
+    # 目前先展示所有课程
+    search_value = ""
+    order_field = ""
+    class_total = ""
+
+    def get_queryset(self):
+        search = self.request.GET.get("search")
+        orderby = self.request.GET.get("orderby")
+        bookid = self.request.GET['bookid']
+        if orderby:
+            all_book = Buybook.objects.all().order_by(orderby)
+            self.order_field = orderby
+        else:
+            # all_book = Buybook.objects.all().order_by(self.order_field)
+            all_book = Buybook.objects.all()
+            book = Buybook.objects.get(id=bookid)
+            book.status = '1'
+            book.save()
+        if search:
+            all_book = all_book.filter(
+                Q(bookname__icontains=search) | Q(author__icontains=search) | Q(coursename__icontains=search) |
+                Q(teacher__teacher_name__icontains=search)
+            )
+            # mywhere = ""
+            self.search_value = search
+        self.class_total = all_book.count()
+        paginator = Paginator(all_book, PAGINATOR_NUMBER)
+        page = self.request.GET.get('page')
+        classes = paginator.get_page(page)
+        return classes
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(BuyView, self).get_context_data(*args, **kwargs)
+        context['class_total'] = self.class_total
+        context['search'] = self.search_value
+        context['orderby'] = self.order_field
+        context['objects'] = self.get_queryset()
+        return context
+
+
+# APPLYBOOK
+def Applybook(request):
+    return render(request, 'Admin/BuyBook/apply_book.html')
+
+
+def EditApplyBook(request):
+    context = {}
+    if request.method == 'GET':
+        info = Buybook()
+        info.isbn = request.GET.get('Inputisbn')
+        if info.isbn != None:
+            # info.teacher = request.GET.get('Inputteacherid')
+            info.coursecode = request.GET.get('Inputcourseid')
+            info.coursename = request.GET.get('Inputcoursename')
+            info.bookname = request.GET.get('Inputbookname')
+            info.author = request.GET.get('Inputauthor')
+            info.save()
+
+        context['info'] = '添加成功'
+        context['teacher'] = info.teacher
+        return render(request, 'Admin/BuyBook/edit_apply_book.html')
+
+
+class EditcourseView(LoginRequiredMixin, DetailView):
+    model = Class
+    context_object_name = 'course'
+    template_name = 'Admin/Course/edit_course.html'
+    login_url = 'login'
+
+    # comment_form = CommentForm()
+
+    def get_object(self, queryset=None):
+        obj = super(EditcourseView, self).get_object(queryset=queryset)
+        return obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_class_name = self.get_object().classname
+        reference_book = Reference_Book.objects.all()
+        context['reference'] = reference_book
+        logger.info(f'Book  <<{current_class_name}>> retrieved from db')
+        return context
+
+
+def Updatecourse(request):
+    # if request.user.is_authenticated():
+    context = {}
+    # admin.site.register([Class])
+    courseid = request.POST['courseid']
+    course = Class.objects.get(classid=courseid)
+    course.classname = request.POST['coursename']
+    course.semester = request.POST['semester']
+    course.grade = request.POST['grade']
+    course.description = request.POST['description']
+    course.file = request.FILES.get('uploadfile')
+    course.reference = request.POST['reference']
+    # course.teacher_id = request.GET['teacher']
+    # with open(course.file.name, 'wb') as f:
+    #     for i in course.file:
+    #         f.write(i)
+    course.save()
+    return render(request, 'Admin/Course/update_course.html')
+
+
+class ReferenceListView(LoginRequiredMixin, TemplateView):
+    login_url = 'login'
+    model = Buybook
+    context_object_name = 'referencelist'
+    template_name = 'Admin/reference/referencelist.html'
+    # TO DO  使用教职工工号搜索相关课程
+    # 目前先展示所有课程
+    search_value = ""
+    order_field = ""
+    class_total = ""
+
+    def get_queryset(self):
+        search = self.request.GET.get("search")
+        orderby = self.request.GET.get("orderby")
+        if orderby:
+            reference_book = Reference_Book.objects.all().order_by(orderby)
+            self.order_field = orderby
+        else:
+            # all_book = Buybook.objects.all().order_by(self.order_field)
+            reference_book = Reference_Book.objects.all()
+        if search:
+            reference_book = reference_book.filter(
+                Q(ISBN__icontains=search) | Q(bookname__icontains=search) | Q(author__icontains=search)
+                # Q(class_id__icontains=search)
+            )
+            # mywhere = ""
+            self.search_value = search
+        self.class_total = reference_book.count()
+        paginator = Paginator(reference_book, PAGINATOR_NUMBER)
+        page = self.request.GET.get('page')
+        classes = paginator.get_page(page)
+        return classes
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ReferenceListView, self).get_context_data(*args, **kwargs)
+        context['class_total'] = self.class_total
+        context['search'] = self.search_value
+        context['orderby'] = self.order_field
+        context['objects'] = self.get_queryset()
+        return context
+
+
+# ClassDetailPage
 class ClassDetailView(LoginRequiredMixin, DetailView):
     model = Class
     context_object_name = 'clasz'
@@ -232,12 +427,9 @@ class ClassDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         current_class_name = self.get_object().classname
         logger.info(f'Book  <<{current_class_name}>> retrieved from db')
-        # comments = Comment.objects.filter(book=self.get_object().id)
-        # related_records = BorrowRecord.objects.filter(book=current_book_name)
-        # context['related_records'] = related_records
-        # context['comments'] = comments
-        # context['comment_form'] = self.comment_form
         return context
+
+
 #
 # # Global Serch
 # @login_required(login_url='login')
@@ -302,29 +494,29 @@ class ClassDetailView(LoginRequiredMixin, DetailView):
 #         return render(request, self.template_name, self.context)
 
 # Book
-class BookListView(LoginRequiredMixin,ListView):
+class BookListView(LoginRequiredMixin, ListView):
     login_url = 'login'
-    model=Book
+    model = Book
     context_object_name = 'books'
     template_name = 'book/book_list.html'
-    search_value=""
+    search_value = ""
     order_field = "id"
 
     def get_queryset(self):
-        search =self.request.GET.get("search")
-        order_by=self.request.GET.get("orderby")
-        print("orderby=",order_by)
+        search = self.request.GET.get("search")
+        order_by = self.request.GET.get("orderby")
+        print("orderby=", order_by)
         if order_by:
             all_books = Book.objects.all().order_by(order_by)
-            self.order_field=order_by
+            self.order_field = order_by
         else:
             all_books = Book.objects.all().order_by(self.order_field)
         if search:
             all_books = all_books.filter(
-                Q(title__icontains=search)|Q(author__icontains=search)
+                Q(title__icontains=search) | Q(author__icontains=search)
             )
             # mywhere = ""
-            self.search_value=search
+            self.search_value = search
         self.count_total = all_books.count()
         paginator = Paginator(all_books, PAGINATOR_NUMBER)
         page = self.request.GET.get('page')
@@ -339,13 +531,15 @@ class BookListView(LoginRequiredMixin,ListView):
         context['objects'] = self.get_queryset()
         return context
 
-class BookDetailView(LoginRequiredMixin,DetailView):
+
+class BookDetailView(LoginRequiredMixin, DetailView):
     model = Book
     context_object_name = 'book'
     template_name = 'book/book_detail.html'
     login_url = 'login'
+
     # comment_form = CommentForm()
-    
+
     def get_object(self, queryset=None):
         obj = super(BookDetailView, self).get_object(queryset=queryset)
         return obj
@@ -358,42 +552,44 @@ class BookDetailView(LoginRequiredMixin,DetailView):
         # related_records = BorrowRecord.objects.filter(book=current_book_name)
         # context['related_records'] = related_records
         # context['comments'] = comments
-        # context['comment_form'] = self.comment_form
+        context['comment_form'] = self.comment_form
         return context
 
-class BookCreateView(LoginRequiredMixin,CreateView):
-    model=Book
+
+class BookCreateView(LoginRequiredMixin, CreateView):
+    model = Book
     login_url = 'login'
     # form_class=BookCreateEditForm
-    template_name='book/book_create.html'
+    template_name = 'book/book_create.html'
 
-    def post(self,request, *args, **kwargs):
-        super(BookCreateView,self).post(request)
+    def post(self, request, *args, **kwargs):
+        super(BookCreateView, self).post(request)
         new_book_name = request.POST['title']
         messages.success(request, f"New Book << {new_book_name} >> Added")
         # UserActivity.objects.create(created_by=self.request.user.username,target_model=self.model.__name__,detail =f"Create {self.model.__name__} << {new_book_name} >>")
         return redirect('book_list')
 
-class BookUpdateView(LoginRequiredMixin,UpdateView):
+
+class BookUpdateView(LoginRequiredMixin, UpdateView):
     model = Book
     login_url = 'login'
-    form_class =BookCreateEditForm
+    form_class = BookCreateEditForm
     template_name = 'book/book_update.html'
 
     def post(self, request, *args, **kwargs):
         current_book = self.get_object()
-        current_book.updated_by =self.request.user.username
+        current_book.updated_by = self.request.user.username
         current_book.save(update_fields=['updated_by'])
-        UserActivity.objects.create(created_by =self.request.user.username,
+        UserActivity.objects.create(created_by=self.request.user.username,
                                     operation_type="warning",
                                     target_model=self.model.__name__,
                                     detail=f"Update {self.model.__name__} <<{current_book.title} >>")
-        return super(BookUpdateView,self).post(request,*args,**kwargs)
+        return super(BookUpdateView, self).post(request, *args, **kwargs)
+
     def form_valid(self, form):
         title = form.cleaned_data['title']
         messages.warning(self.request, f"Update << {title} >> success")
         return super().form_valid(form)
-
 
 
 # class BookUpdateView(LoginRequiredMixin,UpdateView):
@@ -417,11 +613,12 @@ class BookUpdateView(LoginRequiredMixin,UpdateView):
 #       messages.warning(self.request, f"Update << {title} >> success")
 #       return super().form_valid(form)
 
-class BookDeleteView(LoginRequiredMixin,View):
+class BookDeleteView(LoginRequiredMixin, View):
     login_url = 'login'
-    def get(self,request,*args,**kwargs):
-        book_pk=kwargs["pk"]
-        delete_book=Book.objects.get(pk=book_pk)
+
+    def get(self, request, *args, **kwargs):
+        book_pk = kwargs["pk"]
+        delete_book = Book.objects.get(pk=book_pk)
         model_name = delete_book.__class__.__name__
         messages.error(request, f"Book << {delete_book.title} >> Removed")
         delete_book.delete()
@@ -431,31 +628,31 @@ class BookDeleteView(LoginRequiredMixin,View):
         #     detail =f"Delete {model_name} << {delete_book.title} >>")
         return HttpResponseRedirect(reverse("book_list"))
 
+
 # Categorty
 
-class CategoryListView(LoginRequiredMixin,ListView):
+class CategoryListView(LoginRequiredMixin, ListView):
     login_url = 'login'
-    model=Category
+    model = Category
     context_object_name = 'categories'
     template_name = 'book/category_list.html'
     count_total = 0
     search_value = ''
-    order_field="-created_at"
-
+    order_field = "-created_at"
 
     def get_queryset(self):
-        search =self.request.GET.get("search")  
-        order_by=self.request.GET.get("orderby")
+        search = self.request.GET.get("search")
+        order_by = self.request.GET.get("orderby")
         if order_by:
             all_categories = Category.objects.all().order_by(order_by)
-            self.order_field=order_by
+            self.order_field = order_by
         else:
             all_categories = Category.objects.all().order_by(self.order_field)
         if search:
             all_categories = all_categories.filter(
-                Q(name__icontains=search)  
+                Q(name__icontains=search)
             )
-            self.search_value=search
+            self.search_value = search
 
         self.count_total = all_categories.count()
         paginator = Paginator(all_categories, PAGINATOR_NUMBER)
@@ -471,11 +668,12 @@ class CategoryListView(LoginRequiredMixin,ListView):
         context['objects'] = self.get_queryset()
         return context
 
-class CategoryCreateView(LoginRequiredMixin,CreateView):
+
+class CategoryCreateView(LoginRequiredMixin, CreateView):
     login_url = 'login'
-    model=Category
-    fields=['name']
-    template_name='book/category_create.html'
+    model = Category
+    fields = ['name']
+    template_name = 'book/category_create.html'
     success_url = reverse_lazy('category_list')
 
     def form_valid(self, form):
@@ -489,13 +687,12 @@ class CategoryCreateView(LoginRequiredMixin,CreateView):
         return super(CategoryCreateView, self).form_valid(form)
 
 
-
-class CategoryDeleteView(LoginRequiredMixin,View):
+class CategoryDeleteView(LoginRequiredMixin, View):
     login_url = 'login'
 
-    def get(self,request,*args,**kwargs):
-        cat_pk=kwargs["pk"]
-        delete_cat=Category.objects.get(pk=cat_pk)
+    def get(self, request, *args, **kwargs):
+        cat_pk = kwargs["pk"]
+        delete_cat = Category.objects.get(pk=cat_pk)
         model_name = delete_cat.__class__.__name__
         messages.error(request, f"Category << {delete_cat.name} >> Removed")
         delete_cat.delete()
@@ -512,21 +709,21 @@ class CategoryDeleteView(LoginRequiredMixin,View):
 
 # Publisher 
 
-class PublisherListView(LoginRequiredMixin,ListView):
+class PublisherListView(LoginRequiredMixin, ListView):
     login_url = 'login'
-    model=Publisher
+    model = Publisher
     context_object_name = 'publishers'
     template_name = 'book/publisher_list.html'
     count_total = 0
     search_value = ''
-    order_field="-created_at"
+    order_field = "-created_at"
 
     def get_queryset(self):
-        search =self.request.GET.get("search")  
-        order_by=self.request.GET.get("orderby")
+        search = self.request.GET.get("search")
+        order_by = self.request.GET.get("orderby")
         if order_by:
             all_publishers = Publisher.objects.all().order_by(order_by)
-            self.order_field=order_by
+            self.order_field = order_by
         else:
             all_publishers = Publisher.objects.all().order_by(self.order_field)
         if search:
@@ -535,7 +732,7 @@ class PublisherListView(LoginRequiredMixin,ListView):
             )
         else:
             search = ''
-        self.search_value=search
+        self.search_value = search
         self.count_total = all_publishers.count()
         paginator = Paginator(all_publishers, PAGINATOR_NUMBER)
         page = self.request.GET.get('page')
@@ -546,19 +743,19 @@ class PublisherListView(LoginRequiredMixin,ListView):
         context = super(PublisherListView, self).get_context_data(*args, **kwargs)
         context['count_total'] = self.count_total
         context['search'] = self.search_value
-        context['orderby'] = self.order_field  
-        context['objects'] = self.get_queryset()      
+        context['orderby'] = self.order_field
+        context['objects'] = self.get_queryset()
         return context
 
-class PublisherCreateView(LoginRequiredMixin,CreateView):
-    model=Publisher
+
+class PublisherCreateView(LoginRequiredMixin, CreateView):
+    model = Publisher
     login_url = 'login'
     # form_class=PubCreateEditForm
-    template_name='book/publisher_create.html'
+    template_name = 'book/publisher_create.html'
     success_url = reverse_lazy('publisher_list')
 
-
-    def form_valid(self,form):
+    def form_valid(self, form):
         new_pub = form.save(commit=False)
         new_pub.save()
         messages.success(self.request, f"New Publisher << {new_pub.name} >> Added")
@@ -579,15 +776,16 @@ class PublisherCreateView(LoginRequiredMixin,CreateView):
     #                                 detail =f"Create {self.model.__name__} << {new_publisher_name} >>")
     #     return redirect('publisher_list')
 
-class PublisherUpdateView(LoginRequiredMixin,UpdateView):
-    model=Publisher
+
+class PublisherUpdateView(LoginRequiredMixin, UpdateView):
+    model = Publisher
     login_url = 'login'
     # form_class=PubCreateEditForm
     template_name = 'book/publisher_update.html'
 
     def post(self, request, *args, **kwargs):
         current_pub = self.get_object()
-        current_pub.updated_by=self.request.user.username
+        current_pub.updated_by = self.request.user.username
         current_pub.save(update_fields=['updated_by'])
         # UserActivity.objects.create(created_by=self.request.user.username,
         #                             operation_type="warning",
@@ -596,16 +794,17 @@ class PublisherUpdateView(LoginRequiredMixin,UpdateView):
         return super(PublisherUpdateView, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        title=form.cleaned_data['name']      
+        title = form.cleaned_data['name']
         messages.warning(self.request, f"Update << {title} >> success")
         return super().form_valid(form)
 
-class PublisherDeleteView(LoginRequiredMixin,View):
+
+class PublisherDeleteView(LoginRequiredMixin, View):
     login_url = 'login'
 
-    def get(self,request,*args,**kwargs):
-        pub_pk=kwargs["pk"]
-        delete_pub=Publisher.objects.get(pk=pub_pk)
+    def get(self, request, *args, **kwargs):
+        pub_pk = kwargs["pk"]
+        delete_pub = Publisher.objects.get(pk=pub_pk)
         model_name = delete_pub.__class__.__name__
         messages.error(request, f"Publisher << {delete_pub.name} >> Removed")
         delete_pub.delete()
@@ -616,7 +815,6 @@ class PublisherDeleteView(LoginRequiredMixin,View):
         #             target_model=model_name,
         #             detail =f"Delete {model_name} << {delete_pub.name} >>")
         return HttpResponseRedirect(reverse("publisher_list"))
-
 
 # # Profile View
 #

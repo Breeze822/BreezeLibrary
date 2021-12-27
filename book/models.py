@@ -93,6 +93,8 @@ class Class(models.Model):
         on_delete=models.SET_NULL,
         related_name='class_teacher'
     )
+    reference = models.CharField("reference_book", max_length=100, default=None)
+    file = models.FileField(default=None, null=True, upload_to='media/files/')
     def get_absolute_url(self):
         return reverse('class_info')
 
@@ -102,13 +104,13 @@ class Class(models.Model):
 
 #Reference_book
 class Reference_Book(models.Model):
-    ISBN = models.CharField("ISBN",max_length=100,primary_key=True)
-    bookname = models.CharField("BookName",max_length=100)
-    author = models.CharField("Author",max_length=100)
-    publisher = models.CharField("Publisher",max_length=100)
+    ISBN = models.CharField("ISBN",max_length=255,primary_key=True)
+    bookname = models.CharField("BookName",max_length=255)
+    author = models.CharField("Author",max_length=255)
+    publisher = models.CharField("Publisher",max_length=255)
     pub_date =  models.DateTimeField('pub_date', default=timezone.now)
-    link = models.CharField("Link",max_length=100)
-    type = models.CharField("Type",max_length=20)
+    link = models.CharField("Link",max_length=255)
+    type = models.CharField("Type",max_length=255)
     class_id = models.ForeignKey(
         Class,
         null=True,
@@ -116,6 +118,34 @@ class Reference_Book(models.Model):
         on_delete=models.SET_NULL,
         related_name='book_class'
     )
+
+#
+class Buybook(models.Model):
+    id = models.AutoField(primary_key=True)
+    # coursecode = models.ForeignKey(
+    #     Class,
+    #     null=True,
+    #     blank=True,
+    #     on_delete=models.SET_NULL,
+    #     related_name='coursecode'
+    # )
+    coursecode = models.CharField(max_length=255, blank=True, null=True)
+    coursename = models.CharField(max_length=255, blank=True, null=True)
+    # isbn = models.CharField(db_column='ISBN', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    isbn = models.CharField(max_length=255, blank=True, null=True)
+    bookname = models.CharField(max_length=255, blank=True, null=True)
+    author = models.CharField(max_length=255, blank=True, null=True)
+    # teacher = models.CharField(max_length=255, blank=True, null=True)
+    teacher = models.ForeignKey(
+        Teacher,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='teacher'
+    )
+    email = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=3, blank=True, null=False, default='0')
+
 
 
 
