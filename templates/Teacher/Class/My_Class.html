@@ -1,0 +1,120 @@
+{% extends "layouts/base-teacher.html" %}
+{% load book_extras %}
+{% block title %} 我的课程 {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="pcoded-content">
+    <div class="pcoded-inner-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">课程信息展示</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+        <div class="main-body">
+            <div class="page-wrapper">
+                <!-- [ Main Content ] start -->
+                <div class="row">
+                    <!-- [ basic-table ] start -->
+                    <div class="col-xl-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <!--h5>Total  books</h5-->
+{#                                <h5>Total {{ class_total }} classes</h5>#}
+                                <h5>课程</h5>
+                            </div>
+
+                            {% show_messages %}
+
+                            <div class="card-block">
+                                <div class='row'>
+                                    <div class="col-8">
+                                        <b>Sort By : - </b>
+                                        <a href="{% url 'class_info' %}?search={{search}}&orderby=classid">Id</a>  |
+                                        <a href="{% url 'class_info' %}?search={{ search }}&orderby=classname">Classname</a> |
+                                        <a href="{% url 'class_info' %}?search={{ search }}&orderby=semester">semester</a> |
+                                        <a href="{% url 'class_info' %}?search={{ search }}&orderby=grade">grade</a>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <form class="form-inline mb-2">
+                                            <div class="form-group mx-sm-3 mb-2">
+                                                <input type="text"
+                                                       class="form-control"
+                                                       name="search",
+                                                       id='search',
+                                                       placeholder="Search title / author",
+                                                       value={{search}}
+                                                       >
+                                            </div>
+                                            <button type="submit" class="btn btn-secondary mb-2 btn-sm">Search</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive ">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Class_id</th>
+                                                <th>Class_name</th>
+                                                <th>Semester</th>
+                                                <th>Grade</th>
+                                                <th>Teacher_name</th>
+                                                <th>Description</th>
+                                                <th>Files</th>
+                                                <th>Reference</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for clasz in objects %}
+                                                    <tr>
+                                                        <th scope="row">{{clasz.classid}}</th>
+                                                        <td>{{clasz.classname|slice:'10'}}</td>
+                                                        <td>{{clasz.semester}}</td>
+                                                        <td>{{clasz.grade}}</td>
+                                                        <td>{{clasz.teacher.teacherid}}</td>
+                                                        <td>{{clasz.description}}</td>
+                                                        <td>
+                                                            {{clasz.file|slice:'2'}}
+                                                        </td>
+                                                        <td>{{clasz.reference|slice:'5'}}</td>
+                                                        <td>
+                                                           <a href="{% url 'class_detail' clasz.classid%}" class="badge badge-warning"><i class="feather icon-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="row">
+                                    <div class='col-4'>
+<!--                                        <a href="{% url 'book_create' %}" class='btn btn-primary'>Add book</a>-->
+                                    </div>
+                                    <div class='col-8'>
+                                        {% show_pagination %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}{% endblock javascripts %}

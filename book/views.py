@@ -176,8 +176,7 @@ class TeacherView(TemplateView):
 
 
 # ClassInfoPage
-class ClassInfoView(LoginRequiredMixin, TemplateView):
-    login_url = 'login'
+class ClassInfoView( TemplateView):
     model = Class
     context_object_name = 'classes'
     template_name = 'Teacher/Class/Class_info.html'
@@ -190,6 +189,13 @@ class ClassInfoView(LoginRequiredMixin, TemplateView):
     def get_queryset(self):
         search = self.request.GET.get("search")
         orderby = self.request.GET.get("orderby")
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
         if orderby:
             all_class = Class.objects.all().order_by(orderby)
             self.order_field = orderby
@@ -212,7 +218,57 @@ class ClassInfoView(LoginRequiredMixin, TemplateView):
         context['search'] = self.search_value
         context['orderby'] = self.order_field
         context['objects'] = self.get_queryset()
+        # context['group'] = self.group
         return context
+
+#MyClassView
+class MyClassView(LoginRequiredMixin,TemplateView):
+    login_url = 'login'
+    model = Class
+    context_object_name = 'classes'
+    template_name = 'Teacher/Class/My_Class.html'
+    search_value =""
+    order_field = "classid"
+    class_total =""
+
+    def get_queryset(self):
+        search = self.request.GET.get("search")
+        orderby = self.request.GET.get("orderby")
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        if orderby:
+            all_class = Class.objects.all().order_by(orderby)
+            self.order_field = orderby
+        else:
+            all_class = Class.objects.all().order_by(self.order_field)
+        all_class = all_class.filter(
+            teacher_id=user)
+
+        if search:
+            all_class = all_class.filter(
+                Q(classname__icontains=search) | Q(classid__icontains=search)
+            )
+            self.search_value = search
+        self.class_total = all_class.count()
+        paginator = Paginator(all_class, PAGINATOR_NUMBER)
+        page = self.request.GET.get('page')
+        classes = paginator.get_page(page)
+        return classes
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(MyClassView, self).get_context_data(*args, **kwargs)
+        context['class_total'] = self.class_total
+        context['search'] = self.search_value
+        context['orderby'] = self.order_field
+        context['objects'] = self.get_queryset()
+        # context['group'] = self.group
+        return context
+
 
 
 class BuybookView(LoginRequiredMixin, TemplateView):
@@ -629,529 +685,4 @@ class BookDeleteView(LoginRequiredMixin, View):
         return HttpResponseRedirect(reverse("book_list"))
 
 
-# Categorty
 
-class CategoryListView(LoginRequiredMixin, ListView):
-    login_url = 'login'
-    model = Category
-    context_object_name = 'categories'
-    template_name = 'book/category_list.html'
-    count_total = 0
-    search_value = ''
-    order_field = "-created_at"
-
-    def get_queryset(self):
-        search = self.request.GET.get("search")
-        order_by = self.request.GET.get("orderby")
-        if order_by:
-            all_categories = Category.objects.all().order_by(order_by)
-            self.order_field = order_by
-        else:
-            all_categories = Category.objects.all().order_by(self.order_field)
-        if search:
-            all_categories = all_categories.filter(
-                Q(name__icontains=search)
-            )
-            self.search_value = search
-
-        self.count_total = all_categories.count()
-        paginator = Paginator(all_categories, PAGINATOR_NUMBER)
-        page = self.request.GET.get('page')
-        categories = paginator.get_page(page)
-        return categories
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(CategoryListView, self).get_context_data(*args, **kwargs)
-        context['count_total'] = self.count_total
-        context['search'] = self.search_value
-        context['orderby'] = self.order_field
-        context['objects'] = self.get_queryset()
-        return context
-
-
-class CategoryCreateView(LoginRequiredMixin, CreateView):
-    login_url = 'login'
-    model = Category
-    fields = ['name']
-    template_name = 'book/category_create.html'
-    success_url = reverse_lazy('category_list')
-
-    def form_valid(self, form):
-        new_cat = form.save(commit=False)
-        new_cat.save()
-        # send_notification(self.request.user,new_cat,verb=f'Add New Category << {new_cat.name} >>')
-        # logger.info(f'{self.request.user} created Category {new_cat.name}')
-        # UserActivity.objects.create(created_by=self.request.user.username,
-        #                             target_model=self.model.__name__,
-        #                             detail =f"Create {self.model.__name__} << {new_cat.name} >>")
-        return super(CategoryCreateView, self).form_valid(form)
-
-
-class CategoryDeleteView(LoginRequiredMixin, View):
-    login_url = 'login'
-
-    def get(self, request, *args, **kwargs):
-        cat_pk = kwargs["pk"]
-        delete_cat = Category.objects.get(pk=cat_pk)
-        model_name = delete_cat.__class__.__name__
-        messages.error(request, f"Category << {delete_cat.name} >> Removed")
-        delete_cat.delete()
-        # send_notification(self.request.user,delete_cat,verb=f'Delete Category << {delete_cat.name} >>')
-        # UserActivity.objects.create(created_by=self.request.user.username,
-        #                     operation_type="danger",
-        #                     target_model=model_name,
-        #                     detail =f"Delete {model_name} << {delete_cat.name} >>")
-
-        logger.info(f'{self.request.user} delete Category {delete_cat.name}')
-
-        return HttpResponseRedirect(reverse("category_list"))
-
-
-# Publisher 
-
-class PublisherListView(LoginRequiredMixin, ListView):
-    login_url = 'login'
-    model = Publisher
-    context_object_name = 'publishers'
-    template_name = 'book/publisher_list.html'
-    count_total = 0
-    search_value = ''
-    order_field = "-created_at"
-
-    def get_queryset(self):
-        search = self.request.GET.get("search")
-        order_by = self.request.GET.get("orderby")
-        if order_by:
-            all_publishers = Publisher.objects.all().order_by(order_by)
-            self.order_field = order_by
-        else:
-            all_publishers = Publisher.objects.all().order_by(self.order_field)
-        if search:
-            all_publishers = all_publishers.filter(
-                Q(name__icontains=search) | Q(city__icontains=search) | Q(contact__icontains=search)
-            )
-        else:
-            search = ''
-        self.search_value = search
-        self.count_total = all_publishers.count()
-        paginator = Paginator(all_publishers, PAGINATOR_NUMBER)
-        page = self.request.GET.get('page')
-        publishers = paginator.get_page(page)
-        return publishers
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(PublisherListView, self).get_context_data(*args, **kwargs)
-        context['count_total'] = self.count_total
-        context['search'] = self.search_value
-        context['orderby'] = self.order_field
-        context['objects'] = self.get_queryset()
-        return context
-
-
-class PublisherCreateView(LoginRequiredMixin, CreateView):
-    model = Publisher
-    login_url = 'login'
-    # form_class=PubCreateEditForm
-    template_name = 'book/publisher_create.html'
-    success_url = reverse_lazy('publisher_list')
-
-    def form_valid(self, form):
-        new_pub = form.save(commit=False)
-        new_pub.save()
-        messages.success(self.request, f"New Publisher << {new_pub.name} >> Added")
-        # send_notification(self.request.user,new_pub,verb=f'Add New Publisher << {new_pub.name} >>')
-        # logger.info(f'{self.request.user} created Publisher {new_pub.name}')
-        #
-        # UserActivity.objects.create(created_by=self.request.user.username,
-        #                             target_model=self.model.__name__,
-        #                             detail =f"Create {self.model.__name__} << {new_pub.name} >>")
-        return super(PublisherCreateView, self).form_valid(form)
-
-    # def post(self,request, *args, **kwargs):
-    #     super(PublisherCreateView,self).post(request)
-    #     new_publisher_name = request.POST['name']
-    #     messages.success(request, f"New Publisher << {new_publisher_name} >> Added")
-    #     UserActivity.objects.create(created_by=self.request.user.username,
-    #                                 target_model=self.model.__name__,
-    #                                 detail =f"Create {self.model.__name__} << {new_publisher_name} >>")
-    #     return redirect('publisher_list')
-
-
-class PublisherUpdateView(LoginRequiredMixin, UpdateView):
-    model = Publisher
-    login_url = 'login'
-    # form_class=PubCreateEditForm
-    template_name = 'book/publisher_update.html'
-
-    def post(self, request, *args, **kwargs):
-        current_pub = self.get_object()
-        current_pub.updated_by = self.request.user.username
-        current_pub.save(update_fields=['updated_by'])
-        # UserActivity.objects.create(created_by=self.request.user.username,
-        #                             operation_type="warning",
-        #                             target_model=self.model.__name__,
-        #                             detail =f"Update {self.model.__name__} << {current_pub.name} >>")
-        return super(PublisherUpdateView, self).post(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        title = form.cleaned_data['name']
-        messages.warning(self.request, f"Update << {title} >> success")
-        return super().form_valid(form)
-
-
-class PublisherDeleteView(LoginRequiredMixin, View):
-    login_url = 'login'
-
-    def get(self, request, *args, **kwargs):
-        pub_pk = kwargs["pk"]
-        delete_pub = Publisher.objects.get(pk=pub_pk)
-        model_name = delete_pub.__class__.__name__
-        messages.error(request, f"Publisher << {delete_pub.name} >> Removed")
-        delete_pub.delete()
-        # send_notification(self.request.user,delete_pub,verb=f'Delete Publisher << {delete_pub.name} >>')
-        # logger.info(f'{self.request.user} delete Publisher {delete_pub.name}')
-        # UserActivity.objects.create(created_by=self.request.user.username,
-        #             operation_type="danger",
-        #             target_model=model_name,
-        #             detail =f"Delete {model_name} << {delete_pub.name} >>")
-        return HttpResponseRedirect(reverse("publisher_list"))
-
-# # Profile View
-#
-# class ProfileDetailView(LoginRequiredMixin,DetailView):
-#     model = Profile
-#     context_object_name = 'profile'
-#     template_name = 'profile/profile_detail.html'
-#     login_url = 'login'
-#
-#
-#     def get_context_data(self, *args, **kwargs):
-#         current_user= get_object_or_404(Profile,pk=self.kwargs['pk'])
-#         # current_user= Profile.get(pk=kwargs['pk'])
-#         context = super(ProfileDetailView, self).get_context_data(*args, **kwargs)
-#         context['current_user'] = current_user
-#         return context
-#
-# class ProfileCreateView(LoginRequiredMixin,CreateView):
-#     model = Profile
-#     template_name = 'profile/profile_create.html'
-#     login_url = 'login'
-#     form_class= ProfileForm
-#
-#     def form_valid(self,form) -> HttpResponse:
-#         form.instance.user = self.request.user
-#         return super().form_valid(form)
-#
-# class ProfileUpdateView(LoginRequiredMixin,UpdateView):
-#     model = Profile
-#     login_url = 'login'
-#     form_class=ProfileForm
-#     template_name = 'profile/profile_update.html'
-#
-# # Borrow Records
-#
-# class BorrowRecordCreateView(LoginRequiredMixin,CreateView):
-#     model = BorrowRecord
-#     template_name = 'borrow_records/create.html'
-#     form_class=BorrowRecordCreateForm
-#     login_url = 'login'
-#
-#
-#
-#     def get_form(self):
-#         form = super().get_form()
-#         return form
-#
-#     def form_valid(self, form):
-#         selected_member= get_object_or_404(Member,name = form.cleaned_data['borrower'] )
-#         selected_book = Book.objects.get(title=form.cleaned_data['book'])
-#
-#         # if form.is_valid():
-#         #     form.save(commit=True)
-#         #     return HttpResponse("Successfully added the date to database");
-#         # else:
-#         #     # The supplied form contained errors - just print them to the terminal.
-#         #     print(form.errors)
-#
-#         form.instance.borrower_card = selected_member.card_number
-#         form.instance.borrower_email = selected_member.email
-#         form.instance.borrower_phone_number = selected_member.phone_number
-#         form.instance.created_by = self.request.user.username
-#         form.instance.start_day = form.cleaned_data['start_day']
-#         form.instance.end_day = form.cleaned_data['end_day']
-#         form.save()
-#
-#
-#         # Change field on Model Book
-#         selected_book.status=0
-#         selected_book.total_borrow_times+=1
-#         selected_book.quantity-=int(form.cleaned_data['quantity'])
-#         selected_book.save()
-#
-#         # Create Log
-#         borrower_name = selected_member.name
-#         book_name = selected_book.title
-#
-#         messages.success(self.request, f" '{borrower_name}' borrowed <<{book_name}>>")
-#         UserActivity.objects.create(created_by=self.request.user.username,
-#                                     target_model=self.model.__name__,
-#                                     detail =f" '{borrower_name}' borrowed <<{book_name}>>")
-#
-#
-#         return super(BorrowRecordCreateView,self).form_valid(form)
-#
-#
-#     # def post(self,request, *args, **kwargs):
-#
-#     #     return redirect('record_list')
-#
-#
-#
-# @login_required(login_url='login')
-# def auto_member(request):
-#     if request.is_ajax():
-#         query = request.GET.get("term", "")
-#         member_names = Member.objects.filter(name__icontains=query)
-#         results = []
-#         for m in member_names:
-#             results.append(m.name)
-#         data = json.dumps(results)
-#     mimetype = "application/json"
-#     return HttpResponse(data, mimetype)
-#
-# @login_required(login_url='login')
-# def auto_book(request):
-#     if request.is_ajax():
-#         query = request.GET.get("term", "")
-#         book_names = Book.objects.filter(title__icontains=query)
-#         results = [b.title for b in book_names]
-#         data = json.dumps(results)
-#     mimetype = "application/json"
-#     return HttpResponse(data, mimetype)
-#
-# class BorrowRecordDetailView(LoginRequiredMixin,DetailView):
-#     model = BorrowRecord
-#     context_object_name = 'record'
-#     template_name = 'borrow_records/detail.html'
-#     login_url = 'login'
-#
-#     # def get_queryset(self):
-#     #     return BorrowRecord.objects.filter(pk=self.kwargs['pk'])
-#
-#     # Not recommanded
-#     def get_context_data(self, **kwargs):
-#         context = super(BorrowRecordDetailView, self).get_context_data(**kwargs)
-#         related_member = Member.objects.get(name=self.get_object().borrower)
-#         context['related_member'] = related_member
-#         return context
-#
-# class BorrowRecordListView(LoginRequiredMixin,ListView):
-#     model = BorrowRecord
-#     template_name = 'borrow_records/list.html'
-#     login_url = 'login'
-#     context_object_name = 'records'
-#     count_total = 0
-#     search_value = ''
-#     order_field="-closed_at"
-#
-#     def get_queryset(self):
-#         search =self.request.GET.get("search")
-#         order_by=self.request.GET.get("orderby")
-#         if order_by:
-#             all_records = BorrowRecord.objects.all().order_by(order_by)
-#             self.order_field=order_by
-#         else:
-#             all_records = BorrowRecord.objects.all().order_by(self.order_field)
-#         if search:
-#             all_records = BorrowRecord.objects.filter(
-#                 Q(borrower__icontains=search) | Q(book__icontains=search) | Q(borrower_card__icontains=search)
-#             )
-#         else:
-#             search = ''
-#         self.search_value=search
-#         self.count_total = all_records.count()
-#         paginator = Paginator(all_records, PAGINATOR_NUMBER)
-#         page = self.request.GET.get('page')
-#         records = paginator.get_page(page)
-#         return records
-#
-#     def get_context_data(self, *args, **kwargs):
-#         context = super(BorrowRecordListView, self).get_context_data(*args, **kwargs)
-#         context['count_total'] = self.count_total
-#         context['search'] = self.search_value
-#         context['orderby'] = self.order_field
-#         context['objects'] = self.get_queryset()
-#         return context
-#
-# class BorrowRecordDeleteView(LoginRequiredMixin,View):
-#     login_url = 'login'
-#
-#     def get(self,request,*args,**kwargs):
-#         record_pk=kwargs["pk"]
-#         delete_record=BorrowRecord.objects.get(pk=record_pk)
-#         model_name = delete_record.__class__.__name__
-#         messages.error(request, f"Record {delete_record.borrower} => {delete_record.book} Removed")
-#         delete_record.delete()
-#         UserActivity.objects.create(created_by=self.request.user.username,
-#                     operation_type="danger",
-#                     target_model=model_name,
-#                     detail =f"Delete {model_name} {delete_record.borrower}")
-#         return HttpResponseRedirect(reverse("record_list"))
-#
-# class BorrowRecordClose(LoginRequiredMixin,View):
-#     def get(self, request, *args, **kwargs):
-#
-#         close_record = BorrowRecord.objects.get(pk=self.kwargs['pk'])
-#         close_record.closed_by = self.request.user.username
-#         close_record.final_status = close_record.return_status
-#         close_record.delay_days = close_record.get_delay_number_days
-#         close_record.open_or_close = 1
-#         close_record.save()
-#         print(close_record.open_or_close,close_record.final_status,close_record.pk)
-#
-#
-#         borrowed_book = Book.objects.get(title=close_record.book)
-#         borrowed_book.quantity+=1
-#         count_record_same_book = BorrowRecord.objects.filter(book=close_record.book).count()
-#         if count_record_same_book==1:
-#             borrowed_book.status = 1
-#
-#         borrowed_book.save()
-#
-#         model_name = close_record.__class__.__name__
-#         UserActivity.objects.create(created_by=self.request.user.username,
-#                     operation_type="info",
-#                     target_model=model_name,
-#                     detail =f"Close {model_name} '{close_record.borrower}'=>{close_record.book}")
-#         return HttpResponseRedirect(reverse("record_list"))
-#
-#
-# # Data center
-# @method_decorator(allowed_groups(group_name=['download_data']), name='dispatch')
-# class DataCenterView(LoginRequiredMixin,TemplateView):
-#     template_name = 'book/download_data.html'
-#     login_url = 'login'
-#
-#     def get(self,request,*args, **kwargs):
-#         # check_user_group(request.user,"download_data")
-#         data = {m.objects.model._meta.db_table:
-#         {"source":pd.DataFrame(list(m.objects.all().values())) ,
-#           "path":f"{str(settings.BASE_DIR)}/datacenter/{m.__name__}_{TODAY}.csv",
-#            "file_name":f"{m.__name__}_{TODAY}.csv"} for m in apps.get_models() if m.__name__ in allowed_models}
-#
-#         count_total = {k: v['source'].shape[0] for k,v in data.items()}
-#         return render(request,self.template_name,context={'model_list':count_total})
-#
-# @login_required(login_url='login')
-# @allowed_groups(group_name=['download_data'])
-# def download_data(request,model_name):
-#     check_user_group(request.user,"download_data")
-#
-#     download = {m.objects.model._meta.db_table:
-#         {"source":pd.DataFrame(list(m.objects.all().values())) ,
-#           "path":f"{str(settings.BASE_DIR)}/datacenter/{m.__name__}_{TODAY}.csv",
-#            "file_name":f"{m.__name__}_{TODAY}.csv"} for m in apps.get_models() if m.__name__ in allowed_models}
-#
-#     download[model_name]['source'].to_csv(download[model_name]['path'],index=False,encoding='utf-8')
-#     download_file=pd.read_csv(download[model_name]['path'],encoding='utf-8')
-#     response = HttpResponse(download_file,content_type="text/csv")
-#     response = HttpResponse(open(download[model_name]['path'],'r',encoding='utf-8'),content_type="text/csv")
-#     response['Content-Disposition'] = f"attachment;filename={download[model_name]['file_name']}"
-#     return response
-#
-#
-#
-# # Handle Errors
-#
-# def page_not_found(request, exception):
-#     context = {}
-#     response = render(request, "errors/404.html", context=context)
-#     response.status_code = 404
-#     return response
-#
-# def server_error(request, exception=None):
-#     context = {}
-#     response = render(request, "errors/500.html", context=context)
-#     response.status_code = 500
-#     return response
-#
-# def permission_denied(request, exception=None):
-#     context = {}
-#     response = render(request, "errors/403.html", context=context)
-#     response.status_code = 403
-#     return response
-#
-# def bad_request(request, exception=None):
-#     context = {}
-#     response = render(request, "errors/400.html", context=context)
-#     response.status_code = 400
-#     return response
-#
-# # Employees
-# # @method_decorator(user_passes_test(lambda u: check_superuser(u)), name='dispatch')
-# class EmployeeView(SuperUserRequiredMixin,ListView):
-#     login_url = 'login'
-#     model=User
-#     context_object_name = 'employees'
-#     template_name = 'book/employees.html'
-#
-#     # def get(self, request):
-#     #     # check_superuser(request.user)
-#     #     return super(EmployeeView, self).get(self,request)
-#
-# # @method_decorator(user_passes_test(lambda u: check_superuser(u)), name='dispatch')
-# class EmployeeDetailView(SuperUserRequiredMixin,DetailView):
-#     model = User
-#     context_object_name = 'employee'
-#     template_name = 'book/employee_detail.html'
-#     login_url = 'login'
-#
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['groups'] = user_groups
-#         return context
-#
-#
-# @user_passes_test(lambda u: u.is_superuser)
-# @login_required(login_url='login')
-# def EmployeeUpdate(request,pk):
-#     # check_superuser(request.user)
-#     current_user = User.objects.get(pk=pk)
-#     if request.method == 'POST':
-#         chosen_groups = [ g for g in user_groups if "on" in request.POST.getlist(g)]
-#         current_user.groups.clear()
-#         for each in chosen_groups:
-#             group = Group.objects.get(name=each)
-#             current_user.groups.add(group)
-#         messages.success(request, f"Group for  << {current_user.username} >> has been updated")
-#         return redirect('employees_detail', pk=pk)
-#
-#
-#
-# # Notice
-#
-# class NoticeListView(SuperUserRequiredMixin, ListView):
-#     context_object_name = 'notices'
-#     template_name = 'notice_list.html'
-#     login_url = 'login'
-#
-#     # 未读通知的查询集
-#     def get_queryset(self):
-#         return self.request.user.notifications.unread()
-#
-#
-# class NoticeUpdateView(SuperUserRequiredMixin,View):
-#     """Update Status of Notification"""
-#     # 处理 get 请求
-#     def get(self, request):
-#         # 获取未读消息
-#         notice_id = request.GET.get('notice_id')
-#         # 更新单条通知
-#         if notice_id:
-#             request.user.notifications.get(id=notice_id).mark_as_read()
-#             return redirect('category_list')
-#         # 更新全部通知
-#         else:
-#             request.user.notifications.mark_all_as_read()
-#             return redirect('notice_list')
