@@ -12,39 +12,62 @@ The project is coded using a simple and intuitive structure presented below:
    |    |-- wsgi.py                        # Start the app in production
    |    |-- urls.py                        # Define URLs served by all apps/nodes
    |
-   |-- apps/
-   |    |
-   |    |-- home/                          # A simple app that serve HTML files
-   |    |    |-- views.py                  # Serve HTML pages for authenticated users
-   |    |    |-- urls.py                   # Define some super simple routes  
-   |    |
-   |    |-- authentication/                # Handles auth routes (login and register)
+   |-- authentication/                     # Handles auth routes (login and register)
    |    |    |-- urls.py                   # Define authentication routes  
    |    |    |-- views.py                  # Handles login and registration  
    |    |    |-- forms.py                  # Define auth forms (login and register) 
+   |-- book/
    |    |
-   |    |-- static/
+   |    |-- views.py                       # Serve HTML pages for authenticated users
+   |    |-- urls.py                        # Define some super simple routes  
+   |    |-- forms.py                       # Define the forms          
+   |    |    
+   |    |
+   |-- static/
    |    |    |-- <css, JS, images>         # CSS files, Javascripts files
+   |    
+   |-- templates/                          # Templates used to render pages
+   |    |-- includes/                      # HTML chunks and components
+   |    |    |-- navigation.html           # Top menu component
+   |    |    |-- sidebar.html              # Sidebar component 
+   |    |    |-- scripts.html              # Scripts common to all pages
+   |    |    
+   |    |-- layouts/                       # Master pages
+   |    |    |-- base-fullscreen.html      # Used by Authentication pages
+   |    |    |-- base.html                 # Used by common pages
+   |    |    |-- base-teacher.html         # Used by common Teacher pages  
+   |    |    
+   |    |-- accounts/                      # Authentication pages
+   |    |    |-- login.html                # Login page
+   |    |    |-- register.html             # Register page
    |    |
-   |    |-- templates/                     # Templates used to render pages
-   |         |-- includes/                 # HTML chunks and components
-   |         |    |-- navigation.html      # Top menu component
-   |         |    |-- sidebar.html         # Sidebar component
-   |         |    |-- footer.html          # App Footer
-   |         |    |-- scripts.html         # Scripts common to all pages
-   |         |
-   |         |-- layouts/                   # Master pages
-   |         |    |-- base-fullscreen.html  # Used by Authentication pages
-   |         |    |-- base.html             # Used by common pages
-   |         |
-   |         |-- accounts/                  # Authentication pages
-   |         |    |-- login.html            # Login page
-   |         |    |-- register.html         # Register page
-   |         |
-   |         |-- home/                      # UI Kit Pages
-   |              |-- index.html            # Index page
-   |              |-- 404-page.html         # 404 page
-   |              |-- *.html                # All other pages
+   |    |-- Admin/                         # Admin pages
+   |    |    |-- BuyBook/
+   |    |    |    |-- apply_book.html      # Apply_book page
+   |    |    |    |-- edit_apply_book.html # Edit apply book page   
+   |    |    |    |-- buybook.html         # Buybook page
+   |    |    |    |-- edit_buybook.html    # Edit buybook page
+   |    |    |-- Course/
+   |    |    |    |-- edit_course.html     # Edit course page
+   |    |    |    |-- update_course.html   # Update course page
+   |    |    |-- reference/
+   |    |    |    |-- referencelist.html   # Listing reference book  page
+   |    |
+   |    |-- home/                      # UI Kit Pages
+   |    |    |-- index.html            # Index page
+   |    |    |-- 404-page.html         # 404 page
+   |    |    |-- *.html                # All other pages        
+   |    |
+   |    |-- Teacher/
+   |    |    |-- Teacher_index.html     #Index Page
+   |    |    |-- Class/
+   |    |    |   |--class_detail.html 
+   |    |    |   |--Class_info.html 
+   |    |    |   |--My_Class.html 
+   |    |    |--includes/
+   |    |    |   |--Teacher_navigation.html
+   |    |    |   |--Teacher_scripts.html
+   |    |    |   |--Teacher_sidebar.html
    |
    |-- requirements.txt                     # Development modules - SQLite storage
    |
