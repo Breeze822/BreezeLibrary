@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     # 'apps.home',  # Enable the inner home (home)
     'book',
     'crispy_forms',
+    'django_echarts',
 ]
 
 MIDDLEWARE = [
@@ -73,6 +74,11 @@ TEMPLATES = [
 ]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 WSGI_APPLICATION = 'core.wsgi.application'
+
+DJANGO_ECHARTS = {
+    'echarts_version': '4.0.4',
+    'lib_js_host':'cdnjs'
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

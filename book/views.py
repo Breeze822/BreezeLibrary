@@ -48,6 +48,9 @@ from datetime import date, timedelta, datetime
 # from notifications.signals import notify
 # from .notification import send_notification
 import logging
+from pyecharts.charts import Bar
+from django_echarts.views.backend import EChartsBackendView
+
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +75,9 @@ def uiView(request):
     print('html_template=', html_template)
     return HttpResponse(html_template.render(context, request))
 
+def echartview(request):
+    context = {}
+    return render(request,"Teacher/Class/ClassEchart.html")
 
 # 404
 def page_not_found(request, exception):
@@ -134,13 +140,33 @@ class TeacherView(TemplateView):
     #     print(user.get_username(),user.is_superuser)
     def get(self, request, *args, **kwargs):
         book_count = Book.objects.aggregate(Sum('quantity'))['quantity__sum']
+        class11 = Class.objects.filter(grade=1,semester=1).count()
+        class12 = Class.objects.filter(grade=1,semester=2).count()
+        class21 = Class.objects.filter(grade=2,semester=1).count()
+        class22 = Class.objects.filter(grade=2,semester=2).count()
+        class31 = Class.objects.filter(grade=3,semester=1).count()
+        class32 = Class.objects.filter(grade=3,semester=2).count()
+        class41 = Class.objects.filter(grade=4,semester=1).count()
+        class42 = Class.objects.filter(grade=4,semester=2).count()
 
         data_count = {"book": book_count,
+                      "class11": class11,
+                      "class12": class12,
+                      "class21": class21,
+                      "class22": class22,
+                      "class31": class31,
+                      "class32": class32,
+                      "class41": class41,
+                      "class42": class42,
+                      "referencebook":Reference_Book.objects.all().count() ,
+                      "teacher":Teacher.objects.all().count(),
+                      "user_total":User.objects.all().count(),
                       # "member": Member.objects.all().count(),
                       "category": Category.objects.all().count(),
                       "publisher": Publisher.objects.all().count(), }
         user = self.request.user.username
         group = None
+
         if user:
             user = User.objects.get(username=user)
             groups = user.groups.all()
@@ -162,6 +188,7 @@ class TeacherView(TemplateView):
 
         self.context['data_count'] = data_count
         self.context['group'] = group
+        # self.context['user_total'] = self.
         # self.context['recent_user_activities'] = user_activities
         # self.context['user_avatar'] = user_avatar
         # self.context['short_inventory'] = short_inventory
@@ -484,6 +511,17 @@ class ClassDetailView(LoginRequiredMixin, DetailView):
         current_class_name = self.get_object().classname
         logger.info(f'Book  <<{current_class_name}>> retrieved from db')
         return context
+
+# Echarts
+class EchartView(EChartsBackendView):
+    template_name = 'Teacher/Class/ClassEchart.html'
+
+    def get_echarts_instance(self, *args, **kwargs):
+        bar = Bar("Chart","Vise Title")
+        bar.add("课程",["Sememter 1","Semeter 2"],[20 , 10])
+        return bar
+
+
 
 
 #

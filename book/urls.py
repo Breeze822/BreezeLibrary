@@ -6,6 +6,7 @@ from .views import TeacherView,ClassInfoView,ClassDetailView,MyClassView
 from .views import HomeView,BookListView,BookCreateView,BookDeleteView,BookDetailView,BookUpdateView
 from .views import uiView, BuybookView, ReferenceListView, Applybook, EditcourseView
 from .views import BuyView
+from .views import EchartView,echartview
 from . import views
 urlpatterns = [
 
@@ -28,6 +29,9 @@ urlpatterns = [
 
     #ul
     re_path(r'^ui\.*', uiView, name='ui'),
+    #echarts
+    # path('echarts/',EchartView,name='echart'),
+    path('echart/',echartview),
 
     #Admin
     path('buybook/', BuybookView.as_view(), name='buybook'),
