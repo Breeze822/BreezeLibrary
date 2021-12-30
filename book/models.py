@@ -101,6 +101,17 @@ class Class(models.Model):
     def __str__(self):
         return self.classname
 
+#StudentClass
+class Student_Class(models.Model):
+    clasz = models.ForeignKey(
+        Class,
+        on_delete = models.CASCADE,
+    )
+    student = models.ForeignKey(
+        User,
+        on_delete= models.CASCADE,
+    )
+
 
 #Reference_book
 class Reference_Book(models.Model):
@@ -146,7 +157,7 @@ class Buybook(models.Model):
     email = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=3, blank=True, null=False, default='0')
 
-
+#
 
 
 class Book(models.Model):

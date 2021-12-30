@@ -14,7 +14,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from .models import Book, Category, Publisher, UserActivity, Class, Teacher
+from .models import Book, Category, Publisher, UserActivity, Class, Teacher,Student_Class
 from .models import Buybook, Reference_Book
 # from .models import UserActivity,Profile,Member,BorrowRecord
 from django.apps import apps
@@ -216,13 +216,7 @@ class ClassInfoView( TemplateView):
     def get_queryset(self):
         search = self.request.GET.get("search")
         orderby = self.request.GET.get("orderby")
-        user = self.request.user.username
-        group = None
-        if user:
-            users = User.objects.get(username=user)
-            groups = users.groups.all()
-            if groups:
-                group = groups[0]
+
         if orderby:
             all_class = Class.objects.all().order_by(orderby)
             self.order_field = orderby
@@ -245,7 +239,14 @@ class ClassInfoView( TemplateView):
         context['search'] = self.search_value
         context['orderby'] = self.order_field
         context['objects'] = self.get_queryset()
-        # context['group'] = self.group
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        context['group'] = group
         return context
 
 #MyClassView
@@ -262,6 +263,7 @@ class MyClassView(LoginRequiredMixin,TemplateView):
         search = self.request.GET.get("search")
         orderby = self.request.GET.get("orderby")
         user = self.request.user.username
+        userid = self.request.user.id
         group = None
         if user:
             users = User.objects.get(username=user)
@@ -273,9 +275,17 @@ class MyClassView(LoginRequiredMixin,TemplateView):
             self.order_field = orderby
         else:
             all_class = Class.objects.all().order_by(self.order_field)
-        all_class = all_class.filter(
-            teacher_id=user)
-
+        if group.name == "Teacher":
+            all_class = all_class.filter( teacher_id=user)
+        elif group.name == "Student":
+            student_class= Student_Class.objects.all()
+            student_class= student_class.filter(student_id=userid)
+            classid = student_class.values("clasz_id")
+            Stu_class = Student_Class.objects.none()
+            for clasz in classid:
+                classes = all_class.filter(classid = clasz['clasz_id'])
+                Stu_class = Stu_class.union(classes)
+            all_class = Stu_class
         if search:
             all_class = all_class.filter(
                 Q(classname__icontains=search) | Q(classid__icontains=search)
@@ -504,12 +514,21 @@ class ClassDetailView(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset=None):
         obj = super(ClassDetailView, self).get_object(queryset=queryset)
+
         return obj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         current_class_name = self.get_object().classname
         logger.info(f'Book  <<{current_class_name}>> retrieved from db')
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        context['group'] = group
         return context
 
 # Echarts

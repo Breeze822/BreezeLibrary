@@ -53,11 +53,11 @@
                                                        class="form-control"
                                                        name="search",
                                                        id='search',
-                                                       placeholder="Search title / author",
+                                                       placeholder="Search Id / ClassName",
                                                        value={{search}}
                                                        >
                                             </div>
-                                            <button type="submit" class="btn btn-secondary mb-2 btn-sm">Search</button>
+                                            <button type="submit" class="btn btn-secondary mb-2 btn-sm">搜索</button>
                                         </form>
                                     </div>
                                 </div>
@@ -90,7 +90,9 @@
                                                 </td>
                                                 <td>{{clasz.reference|slice:'5'}}</td>
                                                 <td>
+                                                    {% if group.name == "Teacher" or group.name == "Admin" %}
                                                    <a href="{% url 'class_detail' clasz.classid%}" class="badge badge-warning"><i class="feather icon-eye"></i></a>
+                                                    {% endif %}
                                                 </td>
 
                                             </tr>

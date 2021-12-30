@@ -68,10 +68,20 @@
                                                 <label>课程参考书</label><br>
 <!--                                                <input type="file" class="form-control" name="uploadfile">-->
                                                 <select class="selectpicker show-tick form-control" name="reference" required data-live-search="true"  >
-                                                    <option selected>选择教学参考书</option>
-                                                    {% for r_book in reference %}
-                                                    <option>{{r_book.bookname}}</option>
-                                                    {% endfor %}
+                                                    {% if course.reference %}
+                                                        {% for r_book in reference %}
+                                                        {% if r_book.bookname == course.reference %}
+                                                            <option selected>{{ course.reference }}</option>
+                                                        {% else %}
+                                                            <option>{{r_book.bookname}}</option>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option>暂无参考书</option>
+                                                        {% for r_book in reference %}
+                                                        <option>{{r_book.bookname}}</option>
+                                                        {% endfor %}
+                                                    {% endif %}
                                                 </select>
                                             </div>
                                             <div class="form-group">
