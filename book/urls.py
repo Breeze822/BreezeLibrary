@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from .views import TeacherView,ClassInfoView,ClassDetailView,MyClassView
 from .views import HomeView,BookListView,BookCreateView,BookDeleteView,BookDetailView,BookUpdateView
-from .views import uiView, BuybookView, ReferenceListView, Applybook, EditcourseView
+from .views import uiView, BuybookView, ReferenceListView, ApplybookView ,EditcourseView
 from .views import BuyView
 from .views import EchartView,echartview
 from . import views
@@ -42,7 +42,7 @@ urlpatterns = [
     path('booklist/', ReferenceListView.as_view(), name='referencelist'),
 
     #Apply
-    path('apply_book/', Applybook, name='apply_book'),
+    path('apply_book/', ApplybookView.as_view(), name='apply_book'),
 
     #Edit
     path('edit_course/<str:pk>/', EditcourseView.as_view(), name='edit_course'),

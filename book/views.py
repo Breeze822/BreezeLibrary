@@ -14,7 +14,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from .models import Book, Category, Publisher, UserActivity, Class, Teacher,Student_Class
+from .models import Book, Category, Publisher, UserActivity, Class, Teacher, Student_Class
 from .models import Buybook, Reference_Book
 # from .models import UserActivity,Profile,Member,BorrowRecord
 from django.apps import apps
@@ -303,6 +303,14 @@ class MyClassView(LoginRequiredMixin,TemplateView):
         context['search'] = self.search_value
         context['orderby'] = self.order_field
         context['objects'] = self.get_queryset()
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        context['group'] = group
         # context['group'] = self.group
         return context
 
@@ -348,6 +356,14 @@ class BuybookView(LoginRequiredMixin, TemplateView):
         context['search'] = self.search_value
         context['orderby'] = self.order_field
         context['objects'] = self.get_queryset()
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        context['group'] = group
         return context
 
 
@@ -386,6 +402,7 @@ class BuyView(LoginRequiredMixin, TemplateView):
         paginator = Paginator(all_book, PAGINATOR_NUMBER)
         page = self.request.GET.get('page')
         classes = paginator.get_page(page)
+
         return classes
 
     def get_context_data(self, *args, **kwargs):
@@ -394,12 +411,35 @@ class BuyView(LoginRequiredMixin, TemplateView):
         context['search'] = self.search_value
         context['orderby'] = self.order_field
         context['objects'] = self.get_queryset()
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        context['group'] = group
         return context
 
 
 # APPLYBOOK
-def Applybook(request):
-    return render(request, 'Admin/BuyBook/apply_book.html')
+class ApplybookView(LoginRequiredMixin, TemplateView):
+    login_url = 'login'
+    model = Buybook
+    context_object_name = 'applybooks'
+    template_name = 'Admin/BuyBook/apply_book.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ApplybookView, self).get_context_data(*args, **kwargs)
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        context['group'] = group
+        return context
 
 
 def EditApplyBook(request):
@@ -438,6 +478,14 @@ class EditcourseView(LoginRequiredMixin, DetailView):
         reference_book = Reference_Book.objects.all()
         context['reference'] = reference_book
         logger.info(f'Book  <<{current_class_name}>> retrieved from db')
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        context['group'] = group
         return context
 
 
@@ -500,6 +548,14 @@ class ReferenceListView(LoginRequiredMixin, TemplateView):
         context['search'] = self.search_value
         context['orderby'] = self.order_field
         context['objects'] = self.get_queryset()
+        user = self.request.user.username
+        group = None
+        if user:
+            users = User.objects.get(username=user)
+            groups = users.groups.all()
+            if groups:
+                group = groups[0]
+        context['group'] = group
         return context
 
 
